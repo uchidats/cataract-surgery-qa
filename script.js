@@ -127,9 +127,19 @@
         ? "選択した単元はすべて習得済みです。「全問復習」で再挑戦できます。"
         : "この条件に該当する問題はありません。";
   }
+  function isMultiChoice(q) {
+    return Array.isArray(q.correctIndexes);
+  }
+  function getCorrectIndexes(q) {
+    if (isMultiChoice(q)) {
+      return [...q.correctIndexes].sort((a, b) => a - b);
+    }
+    return [q.correctIndex];
+  }
   function showQuestion() {
     answered = false;
     const q = round[position];
+    const isMulti = isMultiChoice(q);
     get("quiz-progress").textContent = `全${round.length}問中 ${position + 1}問目`;
     get("quiz-chapter").textContent = q.chapter;
     get("quiz-question").textContent = q.question;
@@ -137,17 +147,37 @@
     next.hidden = true;
     submit.disabled = true;
     choices.disabled = false;
+
+    const legend = choices.querySelector("legend");
+    if (legend) {
+      legend.textContent = isMulti ? "当てはまる答えをすべて選んでください" : "答えを1つ選んでください";
+    }
+
     get("quiz-options").replaceChildren();
-    [...q.choices, "わからない"].forEach((text, index) => {
+    q.choices.forEach((text, index) => {
       const label = element("label", undefined, "quiz-option");
       const input = document.createElement("input");
-      input.type = "radio";
+      input.type = isMulti ? "checkbox" : "radio";
       input.name = "answer";
-      input.value = index === q.choices.length ? "unknown" : String(index);
-      input.required = true;
-      label.append(input, element("span", text));
+      input.value = String(index);
+      label.append(input, element("span", text, "quiz-option-text"));
       get("quiz-options").append(label);
     });
+
+    const unknownLabel = element("label", undefined, "quiz-option quiz-option-unknown");
+    const unknownInput = document.createElement("input");
+    unknownInput.type = isMulti ? "checkbox" : "radio";
+    unknownInput.name = isMulti ? "unknown-option" : "answer";
+    unknownInput.value = "unknown";
+    unknownLabel.append(unknownInput, element("span", "わからない", "quiz-option-text"));
+    get("quiz-options").append(unknownLabel);
+
+    unknownInput.addEventListener("change", () => {
+      if (unknownInput.checked && !answered) {
+        handleAnswerSubmit("unknown");
+      }
+    });
+
     get("quiz-question").focus();
   }
   function start() {
@@ -167,29 +197,108 @@
     panel.hidden = false;
     showQuestion();
   }
-  form.addEventListener("change", () => { if (!answered) submit.disabled = false; });
-  form.addEventListener("submit", event => {
-    event.preventDefault();
-    const selected = form.querySelector('input[name="answer"]:checked');
-    if (answered || !selected) return;
+  form.addEventListener("change", e => {
+    if (answered) return;
+    const q = round[position];
+    const isMulti = isMultiChoice(q);
+    if (isMulti) {
+      const checkedAnswers = form.querySelectorAll('input[name="answer"]:checked');
+      submit.disabled = checkedAnswers.length === 0;
+    } else {
+      const selected = form.querySelector('input[name="answer"]:checked');
+      submit.disabled = !selected || selected.value === "unknown";
+    }
+  });
+  function handleAnswerSubmit(forcedStatus) {
+    if (answered) return;
     answered = true;
     const q = round[position];
-    const status = selected.value === "unknown" ? "unknown"
-      : Number(selected.value) === q.correctIndex ? "correct" : "incorrect";
-    responses.push({ question: q, selected: selected.value, status });
+    const isMulti = isMultiChoice(q);
+    const correctAnswers = getCorrectIndexes(q);
+
+    let status = "";
+    let userAnswers = [];
+
+    if (forcedStatus === "unknown") {
+      status = "unknown";
+    } else if (isMulti) {
+      const checked = [...form.querySelectorAll('input[name="answer"]:checked')];
+      userAnswers = checked.map(input => Number(input.value)).sort((a, b) => a - b);
+      const isCorrect = userAnswers.length === correctAnswers.length &&
+        userAnswers.every((val, i) => val === correctAnswers[i]);
+      status = isCorrect ? "correct" : "incorrect";
+    } else {
+      const selected = form.querySelector('input[name="answer"]:checked');
+      if (!selected) return;
+      if (selected.value === "unknown") {
+        status = "unknown";
+      } else {
+        const val = Number(selected.value);
+        userAnswers = [val];
+        status = val === q.correctIndex ? "correct" : "incorrect";
+      }
+    }
+
+    responses.push({ question: q, selected: status === "unknown" ? "unknown" : userAnswers, status });
     setRecord(q.id, status);
     choices.disabled = true;
     submit.disabled = true;
+
+    // 回答確定後の選択肢ハイライト
+    const optionLabels = get("quiz-options").querySelectorAll(".quiz-option");
+    optionLabels.forEach((label, index) => {
+      if (index === q.choices.length) {
+        if (status === "unknown") {
+          label.classList.add("is-user-selected");
+          label.append(element("span", "選択", "quiz-option-status quiz-badge-missed"));
+        } else {
+          label.classList.add("is-not-selected");
+        }
+        return;
+      }
+
+      const isCorrect = correctAnswers.includes(index);
+      const isUser = userAnswers.includes(index);
+
+      if (isCorrect && isUser) {
+        label.classList.add("is-correct", "is-user-selected");
+        label.append(element("span", "✓ 正解", "quiz-option-status quiz-badge-correct"));
+      } else if (isCorrect && !isUser) {
+        label.classList.add("is-correct", "is-missed");
+        label.append(element("span", "✓ 正解（未選択）", "quiz-option-status quiz-badge-missed"));
+      } else if (!isCorrect && isUser) {
+        label.classList.add("is-incorrect", "is-user-selected");
+        label.append(element("span", "× 誤り", "quiz-option-status quiz-badge-incorrect"));
+      } else {
+        label.classList.add("is-not-selected");
+      }
+    });
+
     get("quiz-verdict").textContent = verdicts[status];
     feedback.dataset.correct = String(status === "correct");
     feedback.dataset.verdict = status;
-    get("quiz-correct-answer").textContent = `正解：${q.choices[q.correctIndex]}`;
+
+    const correctLabels = correctAnswers.map(idx => `${idx + 1}. ${q.choices[idx]}`);
+    get("quiz-correct-answer").textContent = `正解：${correctLabels.join("、 ")}`;
     get("quiz-explanation").textContent = q.feedback;
-    get("quiz-source").textContent = `『スタンダード白内障手術』 ${q.source}`;
+    get("quiz-source").textContent = q.source ? `『スタンダード白内障手術』 ${q.source}` : `『スタンダード白内障手術』`;
     feedback.hidden = false;
     next.textContent = position === round.length - 1 ? "結果を見る" : "次の問題";
     next.hidden = false;
     feedback.focus();
+  }
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    if (answered) return;
+    const q = round[position];
+    const isMulti = isMultiChoice(q);
+    if (!isMulti) {
+      const selected = form.querySelector('input[name="answer"]:checked');
+      if (!selected) return;
+      handleAnswerSubmit(selected.value === "unknown" ? "unknown" : undefined);
+    } else {
+      handleAnswerSubmit();
+    }
   });
   next.addEventListener("click", () => {
     if (!answered || panel.hidden) return;
@@ -205,11 +314,30 @@
     const mistakes = responses.filter(r => r.status !== "correct");
     if (!mistakes.length) review.append(element("p", "今回は復習が必要な問題はありません。"));
     for (const { question: q, selected, status } of mistakes) {
+      const correctAnswers = getCorrectIndexes(q);
       const card = element("article", undefined, "quiz-card quiz-review-card");
-      card.append(element("h3", q.question), element("p", verdicts[status]),
-        element("p", `あなたの回答：${selected === "unknown" ? "わからない" : q.choices[Number(selected)]}`),
-        element("p", `正解：${q.choices[q.correctIndex]}`), element("p", q.feedback),
-        element("p", `『スタンダード白内障手術』 ${q.source}`, "quiz-source"));
+
+      let userText = "";
+      if (status === "unknown" || selected === "unknown") {
+        userText = "わからない";
+      } else if (Array.isArray(selected)) {
+        userText = selected.length > 0
+          ? selected.map(i => `${i + 1}. ${q.choices[i]}`).join("、 ")
+          : "未選択";
+      } else {
+        userText = `${Number(selected) + 1}. ${q.choices[Number(selected)]}`;
+      }
+
+      const correctText = correctAnswers.map(i => `${i + 1}. ${q.choices[i]}`).join("、 ");
+
+      card.append(
+        element("h3", q.question),
+        element("p", verdicts[status]),
+        element("p", `あなたの回答：${userText}`),
+        element("p", `正解：${correctText}`),
+        element("p", q.feedback),
+        element("p", q.source ? `『スタンダード白内障手術』 ${q.source}` : `『スタンダード白内障手術』`, "quiz-source")
+      );
       review.append(card);
     }
     get("quiz-score").focus();
