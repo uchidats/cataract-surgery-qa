@@ -318,7 +318,14 @@
       }
     });
 
-    get("quiz-verdict").textContent = verdicts[status];
+    const verdictEl = get("quiz-verdict");
+    if (status === "unknown") {
+      verdictEl.textContent = "";
+      verdictEl.hidden = true;
+    } else {
+      verdictEl.textContent = verdicts[status];
+      verdictEl.hidden = false;
+    }
     feedback.dataset.correct = String(status === "correct");
     feedback.dataset.verdict = status;
 

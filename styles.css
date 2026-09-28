@@ -341,6 +341,10 @@ footer {
 .quiz-feedback[data-correct="true"] { background: var(--soft-green); }
 .quiz-feedback[data-correct="false"] { background: var(--soft-yellow); }
 .quiz-verdict { margin-top: 0; font-size: 1.2rem; font-weight: 700; }
+.quiz-feedback > *:first-child,
+.quiz-feedback > [hidden] + * {
+  margin-top: 0;
+}
 .quiz-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
 .quiz-links a { display: inline-block; padding: 8px 0; }
 .quiz-links .button { margin-top: 0; }
