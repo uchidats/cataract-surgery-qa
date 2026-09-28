@@ -105,10 +105,20 @@
     input.value = chapter;
     input.checked = count > 0;
     input.disabled = count === 0;
+
+    const nameSpan = element("span", chapter, "quiz-cat-name");
+
+    const progressRow = element("div", undefined, "quiz-cat-progress");
     const badge = element("span", undefined, "quiz-cat-count");
     badge.id = `chapter-count-${index}`;
-    const nameSpan = element("span", chapter, "quiz-cat-name");
-    label.append(input, nameSpan, badge);
+
+    const barTrack = element("div", undefined, "quiz-cat-bar-track");
+    const barFill = element("div", undefined, "quiz-cat-bar-fill");
+    barFill.id = `chapter-bar-${index}`;
+    barTrack.append(barFill);
+
+    progressRow.append(badge, barTrack);
+    label.append(input, nameSpan, progressRow);
     categoryList.append(label);
   });
   function getCandidatePool() {
@@ -129,10 +139,14 @@
       const hasQuestions = scope.length > 0;
       const mastered = scope.filter(q => progress[q.id]?.mastered).length;
       const badge = get(`chapter-count-${index}`);
+      const bar = get(`chapter-bar-${index}`);
       if (badge) {
-        badge.textContent = !hasQuestions ? "準備中" : mastered === scope.length
-          ? `✓ ${mastered} / ${scope.length}問` : `未習得 ${scope.length - mastered} / ${scope.length}問`;
+        badge.textContent = !hasQuestions ? "準備中" : `${mastered} / ${scope.length}問`;
         badge.classList.toggle("quiz-cat-completed", hasQuestions && mastered === scope.length);
+      }
+      if (bar) {
+        const percent = hasQuestions && scope.length > 0 ? (mastered / scope.length) * 100 : 0;
+        bar.style.width = `${percent}%`;
       }
       const input = categoryList.querySelector(`input[value="${chapter}"]`);
       if (input) {
@@ -142,7 +156,19 @@
         }
       }
     });
-    get("mastery-progress").textContent = `全体の習得：${QUESTIONS.filter(q => progress[q.id]?.mastered).length} / ${QUESTIONS.length}問`;
+    const totalMastered = QUESTIONS.filter(q => progress[q.id]?.mastered).length;
+    const totalQuestions = QUESTIONS.length;
+    const overallPercent = totalQuestions > 0 ? (totalMastered / totalQuestions) * 100 : 0;
+
+    get("mastery-progress").textContent = `全体の習得：${totalMastered} / ${totalQuestions}問`;
+    const overallFill = get("mastery-progress-fill");
+    if (overallFill) {
+      overallFill.style.width = `${overallPercent}%`;
+    }
+    const overallTrack = get("mastery-progress-track");
+    if (overallTrack) {
+      overallTrack.setAttribute("aria-valuenow", Math.round(overallPercent));
+    }
     const { selected, mode, scope, pool } = getCandidatePool();
     get("quiz-category-error").hidden = selected.length > 0;
     startBtn.disabled = pool.length === 0;

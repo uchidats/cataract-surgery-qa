@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>確認テスト｜白内障手術 Q&amp;A</title>
-  <link rel="stylesheet" href="styles.css?v=22">
-  <script src="questions.js?v=22" defer></script>
-  <script src="script.js?v=22" defer></script>
+  <link rel="stylesheet" href="styles.css?v=23">
+  <script src="questions.js?v=23" defer></script>
+  <script src="script.js?v=23" defer></script>
 </head>
 <body>
   <header class="site-header compact"><div class="container">
@@ -22,6 +22,9 @@
     <noscript><p>確認テストにはJavaScriptが必要です。</p></noscript>
     <p id="storage-warning" role="status" hidden></p>
     <p id="mastery-progress" class="quiz-progress" aria-live="polite"></p>
+    <div id="mastery-progress-track" class="overall-progress-track" role="progressbar" aria-label="全体の習得率" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div id="mastery-progress-fill" class="overall-progress-fill"></div>
+    </div>
     <section id="quiz-setup" class="quiz-card" aria-labelledby="quiz-setup-heading" hidden>
       <h2 id="quiz-setup-heading" tabindex="-1">出題する単元を選んでください</h2>
       <fieldset id="quiz-category-fieldset">
