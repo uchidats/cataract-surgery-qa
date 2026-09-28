@@ -56,14 +56,14 @@
     return node;
   }
   function normalizeChapter(name) {
-    return (name || "").replace(/[\s\u3000]+/g, " ").trim();
+    return (name || "").replace(/[\s\u3000]+/g, "").trim();
   }
   function isChapterMatch(qChapter, targetChapter) {
     const normQ = normalizeChapter(qChapter);
     const normTarget = normalizeChapter(targetChapter);
     if (normQ === normTarget) return true;
-    const prefixMatch = normTarget.match(/^([①-⑳\d]+)/);
-    if (prefixMatch && normQ.startsWith(prefixMatch[1])) {
+    const prefixOnly = normTarget.match(/^([①-⑳\d]+)$/);
+    if (prefixOnly && normQ.startsWith(prefixOnly[1])) {
       return true;
     }
     return false;
