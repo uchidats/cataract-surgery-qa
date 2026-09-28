@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>確認テスト｜白内障手術 Q&amp;A</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="questions.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="site-header compact"><div class="container">
+    <a class="site-title" href="index.html">白内障手術 Q&amp;A</a>
+    <p class="tagline">Tachikawa Hospital Ophthalmology</p>
+  </div></header>
+  <main class="quiz-page"><div class="container narrow">
+    <h1>確認テスト</h1>
+    <p class="article-lead">『スタンダード白内障手術』を読んだあと、理解を確認してみましょう。</p>
+    <p>正解した問題は習得済みとして保存されます。分からない場合は「わからない」を選び、解説と参照ページで確認してください。</p>
+    <p id="quiz-unavailable">確認テストを読み込めない場合は、ページを再読み込みしてください。</p>
+    <noscript><p>確認テストにはJavaScriptが必要です。</p></noscript>
+    <p id="storage-warning" role="status" hidden></p>
+    <p id="mastery-progress" class="quiz-progress" aria-live="polite"></p>
+    <section id="quiz-setup" class="quiz-card" aria-labelledby="quiz-setup-heading" hidden>
+      <h2 id="quiz-setup-heading" tabindex="-1">出題する単元を選んでください</h2>
+      <fieldset id="quiz-category-fieldset">
+        <legend class="quiz-filter-legend">出題単元</legend>
+        <div id="quiz-category-list" class="quiz-category-list"></div>
+      </fieldset>
+      <fieldset class="quiz-kind-fieldset">
+        <legend class="quiz-filter-legend">出題モード</legend>
+        <div id="quiz-mode-list" class="quiz-kind-list">
+          <label class="quiz-kind-option"><input type="radio" name="mode" value="unmastered" checked><span>未習得のみ</span></label>
+          <label class="quiz-kind-option"><input type="radio" name="mode" value="all"><span>全問復習</span></label>
+          <label class="quiz-kind-option"><input type="radio" name="mode" value="incorrect"><span>前回不正解のみ</span></label>
+          <label class="quiz-kind-option"><input type="radio" name="mode" value="unknown"><span>「わからない」のみ</span></label>
+        </div>
+      </fieldset>
+      <p id="quiz-pool-info" class="quiz-pool-info" aria-live="polite"></p>
+      <p id="quiz-category-error" class="quiz-category-error" aria-live="polite" hidden>1つ以上の単元を選択してください。</p>
+      <div class="quiz-links">
+        <button id="quiz-start" class="button" type="button">テストを開始</button>
+        <button id="quiz-reset" class="button secondary" type="button">進捗をリセット</button>
+      </div>
+    </section>
+    <section id="quiz-panel" class="quiz-card" aria-labelledby="quiz-question" hidden>
+      <p id="quiz-progress" class="quiz-progress"></p>
+      <p id="quiz-chapter" class="quiz-progress"></p>
+      <h2 id="quiz-question" tabindex="-1"></h2>
+      <form id="quiz-form">
+        <fieldset id="quiz-choices">
+          <legend>答えを1つ選んでください</legend>
+          <div id="quiz-options" class="quiz-options"></div>
+        </fieldset>
+        <button id="quiz-submit" class="button" type="submit" disabled>回答する</button>
+      </form>
+      <section id="quiz-feedback" class="quiz-feedback" tabindex="-1" aria-labelledby="quiz-verdict" hidden>
+        <h3 id="quiz-verdict" class="quiz-verdict"></h3>
+        <p id="quiz-correct-answer"></p>
+        <p id="quiz-explanation"></p>
+        <p id="quiz-source" class="quiz-source"></p>
+      </section>
+      <button id="quiz-next" class="button" type="button" hidden>次の問題</button>
+    </section>
+    <section id="quiz-result" class="quiz-card" aria-labelledby="quiz-score" hidden>
+      <h2 id="quiz-score" tabindex="-1"></h2>
+      <p id="quiz-summary"></p>
+      <div id="quiz-review" class="quiz-review"></div>
+      <p>分からなかったところは、解説と参照ページで確認していきましょう。</p>
+      <button id="quiz-restart" class="button" type="button">もう一度挑戦</button>
+    </section>
+  </div></main>
+  <footer class="site-footer"><div class="container"><p>教育用確認テスト。診療上の最終判断は最新の教科書・添付文書・院内手順等を確認してください。</p></div></footer>
+</body>
+</html>
