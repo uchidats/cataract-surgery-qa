@@ -14,6 +14,8 @@
   const feedback = get("quiz-feedback");
   const next = get("quiz-next");
   const startBtn = get("quiz-start");
+  const homeNav = get("quiz-home-nav");
+  const homeBtn = get("quiz-home");
   const verdicts = { correct: "○ 正解", incorrect: "× 不正解", unknown: "？ わからない" };
   let round = [], position = 0, answered = false, responses = [];
 
@@ -233,6 +235,7 @@
     setup.hidden = true;
     result.hidden = true;
     panel.hidden = false;
+    if (homeNav) homeNav.hidden = false;
     showQuestion();
   }
   form.addEventListener("change", e => {
@@ -407,13 +410,25 @@
     }
     get("quiz-score").focus();
   });
-  get("quiz-restart").addEventListener("click", () => {
+  function returnToTop() {
     result.hidden = true;
     panel.hidden = true;
+    if (homeNav) homeNav.hidden = true;
     updatePoolInfo();
     setup.hidden = false;
     get("quiz-setup-heading").focus();
-  });
+  }
+  get("quiz-restart").addEventListener("click", returnToTop);
+  if (homeBtn) {
+    homeBtn.addEventListener("click", () => {
+      if (!panel.hidden) {
+        if (!confirm("問題を解いている途中です。中断してトップ画面に戻りますか？")) {
+          return;
+        }
+      }
+      returnToTop();
+    });
+  }
   get("quiz-reset").addEventListener("click", () => {
     if (!confirm("すべての習得履歴・回答履歴をリセットします。よろしいですか？")) return;
     progress = {};
@@ -425,5 +440,6 @@
   startBtn.addEventListener("click", start);
   updatePoolInfo();
   setup.hidden = false;
+  if (homeNav) homeNav.hidden = true;
   get("quiz-unavailable").hidden = true;
 })();

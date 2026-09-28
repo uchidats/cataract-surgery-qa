@@ -351,6 +351,38 @@ footer {
 .quiz-review { display: grid; gap: 16px; }
 .quiz-review-card { min-width: 0; }
 .quiz-review-card h3 { margin-top: 0; }
+.quiz-home-nav {
+  margin-top: 24px;
+  text-align: center;
+}
+.quiz-home-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 22px;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgb(22 59 96 / 5%);
+  transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+}
+.quiz-home-button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--soft-blue);
+}
+.quiz-home-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.quiz-home-button svg {
+  flex-shrink: 0;
+}
 .quiz-page [hidden] { display: none; }
 @media (max-width: 760px) {
   .quiz-card { padding: 16px; }
