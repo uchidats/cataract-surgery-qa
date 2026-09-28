@@ -55,8 +55,25 @@
     if (className) node.className = className;
     return node;
   }
+  function normalizeChapter(name) {
+    return (name || "").replace(/[\s\u3000]+/g, " ").trim();
+  }
+  function isChapterMatch(qChapter, targetChapter) {
+    const normQ = normalizeChapter(qChapter);
+    const normTarget = normalizeChapter(targetChapter);
+    if (normQ === normTarget) return true;
+    const prefixMatch = normTarget.match(/^([①-⑳\d]+)/);
+    if (prefixMatch && normQ.startsWith(prefixMatch[1])) {
+      return true;
+    }
+    return false;
+  }
+  function getQuestionsForChapter(chapter) {
+    return QUESTIONS.filter(q => isChapterMatch(q.chapter, chapter));
+  }
   CHAPTERS.forEach((chapter, index) => {
-    const count = QUESTIONS.filter(q => q.chapter === chapter).length;
+    const scope = getQuestionsForChapter(chapter);
+    const count = scope.length;
     const label = element("label", undefined, "quiz-cat-option");
     const input = document.createElement("input");
     input.type = "checkbox";
@@ -72,7 +89,7 @@
   function getCandidatePool() {
     const selected = [...categoryList.querySelectorAll("input:checked")].map(input => input.value);
     const mode = get("quiz-mode-list").querySelector("input:checked").value;
-    const scope = QUESTIONS.filter(q => selected.includes(q.chapter));
+    const scope = QUESTIONS.filter(q => selected.some(sel => isChapterMatch(q.chapter, sel)));
     const pool = scope.filter(q => {
       const record = progress[q.id];
       if (mode === "unmastered") return !record?.mastered;
@@ -83,12 +100,22 @@
   }
   function updatePoolInfo() {
     CHAPTERS.forEach((chapter, index) => {
-      const scope = QUESTIONS.filter(q => q.chapter === chapter);
+      const scope = getQuestionsForChapter(chapter);
+      const hasQuestions = scope.length > 0;
       const mastered = scope.filter(q => progress[q.id]?.mastered).length;
       const badge = get(`chapter-count-${index}`);
-      badge.textContent = scope.length === 0 ? "準備中" : mastered === scope.length
-        ? `✓ ${mastered} / ${scope.length}問` : `未習得 ${scope.length - mastered} / ${scope.length}問`;
-      badge.classList.toggle("quiz-cat-completed", scope.length > 0 && mastered === scope.length);
+      if (badge) {
+        badge.textContent = !hasQuestions ? "準備中" : mastered === scope.length
+          ? `✓ ${mastered} / ${scope.length}問` : `未習得 ${scope.length - mastered} / ${scope.length}問`;
+        badge.classList.toggle("quiz-cat-completed", hasQuestions && mastered === scope.length);
+      }
+      const input = categoryList.querySelector(`input[value="${chapter}"]`);
+      if (input) {
+        input.disabled = !hasQuestions;
+        if (!hasQuestions) {
+          input.checked = false;
+        }
+      }
     });
     get("mastery-progress").textContent = `全体の習得：${QUESTIONS.filter(q => progress[q.id]?.mastered).length} / ${QUESTIONS.length}問`;
     const { selected, mode, scope, pool } = getCandidatePool();
