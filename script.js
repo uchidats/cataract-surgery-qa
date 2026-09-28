@@ -622,24 +622,6 @@
   if (completionResetBtn) {
     completionResetBtn.addEventListener("click", handleResetAll);
   }
-  const devTestCompletionBtn = get("dev-test-completion");
-  if (devTestCompletionBtn) {
-    devTestCompletionBtn.addEventListener("click", () => {
-      if (!confirm("修了テストを実行しますか？")) return;
-      QUESTIONS.forEach(q => {
-        progress[q.id] = {
-          mastered: true,
-          lastStatus: "correct",
-          attempts: (progress[q.id]?.attempts || 0) + 1,
-          updatedAt: new Date().toISOString()
-        };
-      });
-      saveProgress();
-      clearCompletion();
-      updatePoolInfo();
-      checkCompletion();
-    });
-  }
   categoryList.addEventListener("change", updatePoolInfo);
   get("quiz-mode-list").addEventListener("change", updatePoolInfo);
   startBtn.addEventListener("click", start);
