@@ -88,7 +88,7 @@
   });
   function getCandidatePool() {
     const selected = [...categoryList.querySelectorAll("input:checked")].map(input => input.value);
-    const mode = get("quiz-mode-list").querySelector("input:checked").value;
+    const mode = get("quiz-mode-list").querySelector("input:checked")?.value || "unmastered";
     const scope = QUESTIONS.filter(q => selected.some(sel => isChapterMatch(q.chapter, sel)));
     const pool = scope.filter(q => {
       const record = progress[q.id];
