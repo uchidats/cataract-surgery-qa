@@ -216,12 +216,6 @@
     unknownLabel.append(unknownInput, element("span", "わからない", "quiz-option-text"));
     get("quiz-options").append(unknownLabel);
 
-    unknownInput.addEventListener("change", () => {
-      if (unknownInput.checked && !answered) {
-        handleAnswerSubmit("unknown");
-      }
-    });
-
     get("quiz-question").focus();
   }
   function start() {
@@ -245,12 +239,25 @@
     if (answered) return;
     const q = round[position];
     const isMulti = isMultiChoice(q);
+    const unknownInput = form.querySelector('input[value="unknown"]');
+
+    if (e.target === unknownInput && unknownInput.checked) {
+      // 「わからない」が選択されたら、通常の選択肢をすべて解除
+      form.querySelectorAll('input[name="answer"]').forEach(input => {
+        if (input !== unknownInput) input.checked = false;
+      });
+    } else if (e.target !== unknownInput && e.target.checked && unknownInput) {
+      // 通常の選択肢が選択されたら、「わからない」を解除
+      unknownInput.checked = false;
+    }
+
+    const isUnknown = unknownInput && unknownInput.checked;
     if (isMulti) {
       const checkedAnswers = form.querySelectorAll('input[name="answer"]:checked');
-      submit.disabled = checkedAnswers.length === 0;
+      submit.disabled = checkedAnswers.length === 0 && !isUnknown;
     } else {
       const selected = form.querySelector('input[name="answer"]:checked');
-      submit.disabled = !selected || selected.value === "unknown";
+      submit.disabled = !selected && !isUnknown;
     }
   });
   function handleAnswerSubmit(forcedStatus) {
@@ -309,7 +316,7 @@
         label.append(element("span", "✓ 正解", "quiz-option-status quiz-badge-correct"));
       } else if (isCorrect && !isUser) {
         label.classList.add("is-correct", "is-missed");
-        label.append(element("span", "✓ 正解（未選択）", "quiz-option-status quiz-badge-missed"));
+        label.append(element("span", "◯ 正解", "quiz-option-status quiz-badge-correct"));
       } else if (!isCorrect && isUser) {
         label.classList.add("is-incorrect", "is-user-selected");
         label.append(element("span", "× 誤り", "quiz-option-status quiz-badge-incorrect"));
@@ -343,11 +350,18 @@
     if (answered) return;
     const q = round[position];
     const isMulti = isMultiChoice(q);
+    const unknownInput = form.querySelector('input[value="unknown"]');
+    if (unknownInput && unknownInput.checked) {
+      handleAnswerSubmit("unknown");
+      return;
+    }
     if (!isMulti) {
       const selected = form.querySelector('input[name="answer"]:checked');
       if (!selected) return;
-      handleAnswerSubmit(selected.value === "unknown" ? "unknown" : undefined);
+      handleAnswerSubmit();
     } else {
+      const checkedAnswers = form.querySelectorAll('input[name="answer"]:checked');
+      if (checkedAnswers.length === 0) return;
       handleAnswerSubmit();
     }
   });
