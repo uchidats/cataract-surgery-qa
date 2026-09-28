@@ -633,4 +633,9 @@
   }
   if (homeNav) homeNav.hidden = true;
   get("quiz-unavailable").hidden = true;
+
+  // PWA自動インストールプロンプト（ブラウザ標準の自動バナー等）を抑止
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+  });
 })();
