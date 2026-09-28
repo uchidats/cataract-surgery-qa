@@ -1,0 +1,58 @@
+
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="C:/Users/uchid/Documents/GitHub/cataract-surgery-qa/styles.css">
+  <script src="C:/Users/uchid/Documents/GitHub/cataract-surgery-qa/questions.js"></script>
+  <script src="C:/Users/uchid/Documents/GitHub/cataract-surgery-qa/script.js"></script>
+</head>
+<body>
+  <div id="results"></div>
+  <script>
+    window.addEventListener('load', () => {
+      const header = document.querySelector('.site-header');
+      const footer = document.querySelector('.site-footer');
+      const headerAlign = window.getComputedStyle(header).textAlign;
+      const footerAlign = window.getComputedStyle(footer).textAlign;
+
+      const firstOpt = document.querySelector('.quiz-cat-option');
+      const input = firstOpt.querySelector('input');
+      const title = firstOpt.querySelector('.quiz-cat-name');
+      const progress = firstOpt.querySelector('.quiz-cat-count');
+
+      const optDisplay = window.getComputedStyle(firstOpt).display;
+      const progressAlign = window.getComputedStyle(progress).textAlign;
+
+      const optRect = firstOpt.getBoundingClientRect();
+      const inputRect = input.getBoundingClientRect();
+      const titleRect = title.getBoundingClientRect();
+      const progressRect = progress.getBoundingClientRect();
+
+      // Check vertical ordering in mobile: progress should be below title
+      const isProgressBelowTitle = progressRect.top >= titleRect.top;
+
+      // Check overlap between title and progress
+      const isOverlapping = !(
+        titleRect.right < progressRect.left ||
+        titleRect.left > progressRect.right ||
+        titleRect.bottom <= progressRect.top ||
+        titleRect.top >= progressRect.bottom
+      );
+
+      document.getElementById('results').textContent = JSON.stringify({
+        headerAlign,
+        footerAlign,
+        optDisplay,
+        progressAlign,
+        isProgressBelowTitle,
+        isOverlapping,
+        titleRect,
+        progressRect,
+        optRect
+      });
+    });
+  </script>
+</body>
+</html>

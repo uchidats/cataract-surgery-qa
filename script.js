@@ -83,7 +83,8 @@
     input.disabled = count === 0;
     const badge = element("span", undefined, "quiz-cat-count");
     badge.id = `chapter-count-${index}`;
-    label.append(input, element("span", chapter), badge);
+    const nameSpan = element("span", chapter, "quiz-cat-name");
+    label.append(input, nameSpan, badge);
     categoryList.append(label);
   });
   function getCandidatePool() {
