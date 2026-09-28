@@ -430,16 +430,30 @@
       returnToTop();
     });
   }
+  function formatChoicesForReport(question) {
+    if (!Array.isArray(question?.choices)) return "";
+    return question.choices.map((choice, index) => {
+      if (typeof choice === "string") {
+        return `${index + 1}. ${choice}`;
+      }
+
+      const text = choice?.text ?? "";
+      const image = choice?.image ? ` [${choice.image}]` : "";
+      return `${index + 1}. ${text}${image}`;
+    }).join("\n");
+  }
+
   function openReportForm(question) {
     if (!question) return;
     const baseUrl =
       "https://docs.google.com/forms/d/e/1FAIpQLSe4ajqntE-ZyqbJ8jgaL8_tZJsM0ivYvDYEO6CiRiux5C7eeQ/viewform";
 
     const params = new URLSearchParams({
-      "usp": "pp_url",
+      usp: "pp_url",
       "entry.843181098": question.id,
       "entry.64528700": question.chapter,
-      "entry.982855707": question.question
+      "entry.982855707": question.question,
+      "entry.1187832261": formatChoicesForReport(question)
     });
 
     window.open(`${baseUrl}?${params.toString()}`, "_blank", "noopener,noreferrer");
