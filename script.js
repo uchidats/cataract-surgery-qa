@@ -136,6 +136,27 @@
     }
     return [q.correctIndex];
   }
+  function getChoiceText(choice) {
+    if (typeof choice === "object" && choice !== null) {
+      return choice.text || "";
+    }
+    return String(choice);
+  }
+  function getChoiceImage(choice) {
+    if (typeof choice === "object" && choice !== null) {
+      return choice.image || null;
+    }
+    return null;
+  }
+  function formatChoiceLabel(q, index) {
+    const choice = q.choices[index];
+    const text = getChoiceText(choice);
+    const num = index + 1;
+    if (!text || text === String(num)) {
+      return String(num);
+    }
+    return `${num}. ${text}`;
+  }
   function showQuestion() {
     answered = false;
     const q = round[position];
@@ -154,13 +175,35 @@
     }
 
     get("quiz-options").replaceChildren();
-    q.choices.forEach((text, index) => {
+    q.choices.forEach((choice, index) => {
       const label = element("label", undefined, "quiz-option");
+      const text = getChoiceText(choice);
+      const imgPath = getChoiceImage(choice);
+
+      if (imgPath) {
+        label.classList.add("quiz-option-has-image");
+      }
+
       const input = document.createElement("input");
       input.type = isMulti ? "checkbox" : "radio";
       input.name = "answer";
       input.value = String(index);
-      label.append(input, element("span", text, "quiz-option-text"));
+      label.append(input);
+
+      const content = element("div", undefined, "quiz-option-content");
+      if (text) {
+        content.append(element("span", text, "quiz-option-text"));
+      }
+      if (imgPath) {
+        const img = document.createElement("img");
+        img.src = imgPath;
+        img.alt = `選択肢 ${index + 1}`;
+        img.className = "quiz-option-image";
+        img.loading = "lazy";
+        content.append(img);
+      }
+      label.append(content);
+
       get("quiz-options").append(label);
     });
 
@@ -278,7 +321,7 @@
     feedback.dataset.correct = String(status === "correct");
     feedback.dataset.verdict = status;
 
-    const correctLabels = correctAnswers.map(idx => `${idx + 1}. ${q.choices[idx]}`);
+    const correctLabels = correctAnswers.map(idx => formatChoiceLabel(q, idx));
     get("quiz-correct-answer").textContent = `正解：${correctLabels.join("、 ")}`;
     get("quiz-explanation").textContent = q.feedback;
     get("quiz-source").textContent = q.source ? `『スタンダード白内障手術』 ${q.source}` : `『スタンダード白内障手術』`;
@@ -322,13 +365,13 @@
         userText = "わからない";
       } else if (Array.isArray(selected)) {
         userText = selected.length > 0
-          ? selected.map(i => `${i + 1}. ${q.choices[i]}`).join("、 ")
+          ? selected.map(i => formatChoiceLabel(q, i)).join("、 ")
           : "未選択";
       } else {
-        userText = `${Number(selected) + 1}. ${q.choices[Number(selected)]}`;
+        userText = formatChoiceLabel(q, Number(selected));
       }
 
-      const correctText = correctAnswers.map(i => `${i + 1}. ${q.choices[i]}`).join("、 ");
+      const correctText = correctAnswers.map(i => formatChoiceLabel(q, i)).join("、 ");
 
       card.append(
         element("h3", q.question),

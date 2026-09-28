@@ -268,6 +268,31 @@ h2 {
 .quiz-option input { flex-shrink: 0; accent-color: var(--accent); }
 .quiz-card fieldset:disabled .quiz-option { cursor: default; }
 .quiz-option-text { flex: 1; }
+.quiz-option-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.quiz-option-image {
+  display: block;
+  max-width: 100%;
+  width: auto;
+  max-height: 260px;
+  object-fit: contain;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+.quiz-option-has-image {
+  align-items: flex-start;
+  padding: 14px 16px;
+}
+.quiz-option-has-image .quiz-option-text {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
 .quiz-option-status {
   font-size: 0.85rem;
   font-weight: 700;
