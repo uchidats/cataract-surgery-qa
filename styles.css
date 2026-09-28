@@ -402,6 +402,26 @@ footer {
 .quiz-links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; }
 .quiz-links a { display: inline-block; padding: 8px 0; }
 .quiz-links .button { margin-top: 0; }
+/* 開発用テストボタン（一時的） */
+.quiz-dev-tools {
+  margin-top: 20px;
+  text-align: center;
+}
+.quiz-dev-button {
+  background: none;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+.quiz-dev-button:hover {
+  opacity: 1;
+  border-color: var(--muted);
+}
 .quiz-review { display: grid; gap: 16px; }
 .quiz-review-card { min-width: 0; }
 .quiz-review-card h3 { margin-top: 0; }
