@@ -16,6 +16,7 @@
   const startBtn = get("quiz-start");
   const homeNav = get("quiz-home-nav");
   const homeBtn = get("quiz-home");
+  const reportBtn = get("quiz-report");
   const verdicts = { correct: "○ 正解", incorrect: "× 不正解", unknown: "？ わからない" };
   let round = [], position = 0, answered = false, responses = [];
 
@@ -427,6 +428,25 @@
         }
       }
       returnToTop();
+    });
+  }
+  function openReportForm(question) {
+    if (!question) return;
+    const baseUrl =
+      "https://docs.google.com/forms/d/e/1FAIpQLSe4ajqntE-ZyqbJ8jgaL8_tZJsM0ivYvDYEO6CiRiux5C7eeQ/viewform";
+
+    const params = new URLSearchParams({
+      "usp": "pp_url",
+      "entry.843181098": question.id,
+      "entry.64528700": question.chapter,
+      "entry.982855707": question.question
+    });
+
+    window.open(`${baseUrl}?${params.toString()}`, "_blank", "noopener,noreferrer");
+  }
+  if (reportBtn) {
+    reportBtn.addEventListener("click", () => {
+      openReportForm(round[position]);
     });
   }
   get("quiz-reset").addEventListener("click", () => {
