@@ -504,6 +504,10 @@ footer {
     width: 100%;
     margin-left: 0;
   }
+
+  .quiz-links {
+    justify-content: center;
+  }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
