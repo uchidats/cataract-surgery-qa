@@ -2,11 +2,14 @@
 (() => {
   "use strict";
   const STORAGE_KEY = "cataractSurgeryQaProgressV1";
+  const COMPLETION_KEY = "cataractSurgeryQaCompletionV1";
+  const GAS_COMPLETION_URL = "https://script.google.com/macros/s/AKfycbx1kXbC0nZlKK_20kiMAL19j0jmI7WhW78psYutuvygqcFDmuglU77-D57m-nb1g-tK4w/exec";
   const MAX_QUESTIONS = 10;
   const get = id => document.getElementById(id);
   const setup = get("quiz-setup");
   const panel = get("quiz-panel");
   const result = get("quiz-result");
+  const completionSection = get("quiz-completion");
   const categoryList = get("quiz-category-list");
   const form = get("quiz-form");
   const choices = get("quiz-choices");
@@ -39,6 +42,24 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
       get("storage-warning").hidden = true;
     } catch { storageWarning(); }
+  }
+  function loadCompletion() {
+    try {
+      const data = JSON.parse(localStorage.getItem(COMPLETION_KEY)) || {};
+      return typeof data === "object" && !Array.isArray(data) ? data : {};
+    } catch {
+      return {};
+    }
+  }
+  function saveCompletion(data) {
+    try {
+      localStorage.setItem(COMPLETION_KEY, JSON.stringify(data));
+    } catch {}
+  }
+  function clearCompletion() {
+    try {
+      localStorage.removeItem(COMPLETION_KEY);
+    } catch {}
   }
   function setRecord(id, status) {
     const old = progress[id] || {};
@@ -235,6 +256,7 @@
     responses = [];
     setup.hidden = true;
     result.hidden = true;
+    if (completionSection) completionSection.hidden = true;
     panel.hidden = false;
     if (homeNav) homeNav.hidden = false;
     showQuestion();
@@ -374,6 +396,7 @@
     position++;
     if (position < round.length) return showQuestion();
     panel.hidden = true;
+    if (checkCompletion()) return;
     result.hidden = false;
     const count = status => responses.filter(r => r.status === status).length;
     get("quiz-score").textContent = `${round.length}問中${count("correct")}問正解`;
@@ -411,9 +434,110 @@
     }
     get("quiz-score").focus();
   });
+  function showCompletionScreen(completedAt, hasError) {
+    setup.hidden = true;
+    panel.hidden = true;
+    result.hidden = true;
+    if (homeNav) homeNav.hidden = true;
+
+    const total = QUESTIONS.length;
+    const countEl = get("completion-count");
+    if (countEl) countEl.textContent = `${total} / ${total}問`;
+
+    const dateBlock = get("completion-date-block");
+    const dateEl = get("completion-date");
+    const errorEl = get("completion-error");
+
+    if (hasError || !completedAt) {
+      if (dateBlock) dateBlock.hidden = true;
+      if (errorEl) errorEl.hidden = !hasError;
+    } else {
+      const dateText = completedAt.endsWith("JST") ? completedAt : `${completedAt} JST`;
+      if (dateEl) dateEl.textContent = dateText;
+      if (dateBlock) dateBlock.hidden = false;
+      if (errorEl) errorEl.hidden = true;
+    }
+
+    if (completionSection) {
+      completionSection.hidden = false;
+    }
+    const titleEl = get("completion-title");
+    if (titleEl) titleEl.focus();
+  }
+
+  async function postCompletionToGas(masteredCount, totalCount) {
+    const payload = JSON.stringify({ masteredCount, totalCount });
+    try {
+      const res = await fetch(GAS_COMPLETION_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return { ok: false, error: `HTTP ${res.status}` };
+    } catch {
+      try {
+        const fallbackRes = await fetch(GAS_COMPLETION_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: payload
+        });
+        if (fallbackRes.ok) {
+          return await fallbackRes.json();
+        }
+        return { ok: false, error: `HTTP ${fallbackRes.status}` };
+      } catch (fallbackErr) {
+        return { ok: false, error: String(fallbackErr) };
+      }
+    }
+  }
+
+  function checkCompletion() {
+    const total = QUESTIONS.length;
+    if (total === 0) return false;
+    const mastered = QUESTIONS.filter(q => progress[q.id]?.mastered).length;
+    if (mastered < total) return false;
+
+    const saved = loadCompletion();
+    if (saved && saved.reported && saved.completedAt) {
+      showCompletionScreen(saved.completedAt, false);
+      return true;
+    }
+
+    showCompletionScreen(null, false);
+    postCompletionToGas(mastered, total).then(res => {
+      if (res && res.ok && res.completedAt) {
+        saveCompletion({
+          reported: true,
+          completedAt: res.completedAt,
+          completionId: res.completionId
+        });
+        showCompletionScreen(res.completedAt, false);
+      } else {
+        showCompletionScreen(null, true);
+      }
+    }).catch(() => {
+      showCompletionScreen(null, true);
+    });
+
+    return true;
+  }
+
+  function handleResetAll() {
+    if (!confirm("すべての習得履歴・回答履歴をリセットします。よろしいですか？")) return;
+    progress = {};
+    saveProgress();
+    clearCompletion();
+    if (completionSection) completionSection.hidden = true;
+    returnToTop();
+  }
+
   function returnToTop() {
     result.hidden = true;
     panel.hidden = true;
+    if (completionSection) completionSection.hidden = true;
     if (homeNav) homeNav.hidden = true;
     updatePoolInfo();
     setup.hidden = false;
@@ -465,17 +589,31 @@
       openReportForm(round[position]);
     });
   }
-  get("quiz-reset").addEventListener("click", () => {
-    if (!confirm("すべての習得履歴・回答履歴をリセットします。よろしいですか？")) return;
-    progress = {};
-    saveProgress();
-    updatePoolInfo();
-  });
+  get("quiz-reset").addEventListener("click", handleResetAll);
+  const completionReviewBtn = get("completion-review");
+  if (completionReviewBtn) {
+    completionReviewBtn.addEventListener("click", () => {
+      if (completionSection) completionSection.hidden = true;
+      const allModeInput = get("quiz-mode-list").querySelector('input[value="all"]');
+      if (allModeInput) {
+        allModeInput.checked = true;
+      }
+      returnToTop();
+    });
+  }
+  const completionResetBtn = get("completion-reset");
+  if (completionResetBtn) {
+    completionResetBtn.addEventListener("click", handleResetAll);
+  }
   categoryList.addEventListener("change", updatePoolInfo);
   get("quiz-mode-list").addEventListener("change", updatePoolInfo);
   startBtn.addEventListener("click", start);
   updatePoolInfo();
-  setup.hidden = false;
+  if (checkCompletion()) {
+    // 100%達成時は修了画面を表示（setupは非表示）
+  } else {
+    setup.hidden = false;
+  }
   if (homeNav) homeNav.hidden = true;
   get("quiz-unavailable").hidden = true;
 })();

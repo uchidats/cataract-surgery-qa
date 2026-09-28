@@ -7,9 +7,9 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>確認テスト｜白内障手術 Q&amp;A</title>
-  <link rel="stylesheet" href="styles.css?v=20">
-  <script src="questions.js?v=20" defer></script>
-  <script src="script.js?v=20" defer></script>
+  <link rel="stylesheet" href="styles.css?v=22">
+  <script src="questions.js?v=22" defer></script>
+  <script src="script.js?v=22" defer></script>
 </head>
 <body>
   <header class="site-header compact"><div class="container">
@@ -70,6 +70,23 @@
       <div id="quiz-review" class="quiz-review"></div>
       <p>分からなかったところは、解説と参照ページで確認していきましょう。</p>
       <button id="quiz-restart" class="button" type="button">もう一度挑戦</button>
+    </section>
+    <section id="quiz-completion" class="quiz-card quiz-completion-card" aria-labelledby="completion-title" hidden>
+      <h2 id="completion-title" class="quiz-completion-title" tabindex="-1">全問習得しました</h2>
+      <p class="quiz-completion-sub">白内障手術 Q&amp;A</p>
+      <div class="quiz-completion-stats">
+        <p class="quiz-completion-rate">習得率　100%</p>
+        <p id="completion-count" class="quiz-completion-count"></p>
+      </div>
+      <div id="completion-date-block" class="quiz-completion-date-block">
+        <p class="quiz-completion-date-label">修了日</p>
+        <p id="completion-date" class="quiz-completion-date"></p>
+      </div>
+      <p id="completion-error" class="quiz-completion-error" hidden>修了記録の送信に失敗しました。再読み込みすると再試行します。</p>
+      <div class="quiz-links quiz-completion-actions">
+        <button id="completion-review" class="button" type="button">全問復習する</button>
+        <button id="completion-reset" class="button secondary" type="button">進捗をリセット</button>
+      </div>
     </section>
     <div id="quiz-home-nav" class="quiz-home-nav" hidden>
       <button id="quiz-home" class="quiz-home-button" type="button" title="ホーム" aria-label="ホーム"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>

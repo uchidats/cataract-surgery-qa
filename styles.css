@@ -385,6 +385,73 @@ footer {
 .quiz-review { display: grid; gap: 16px; }
 .quiz-review-card { min-width: 0; }
 .quiz-review-card h3 { margin-top: 0; }
+
+/* 修了画面 */
+.quiz-completion-card {
+  text-align: center;
+  padding: 40px 24px;
+}
+.quiz-completion-title {
+  font-size: 1.65rem;
+  color: var(--heading);
+  margin: 0 0 6px;
+  font-weight: 800;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.quiz-completion-sub {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin: 0 0 24px;
+  font-weight: 700;
+}
+.quiz-completion-stats {
+  background: var(--soft-green);
+  border: 1px solid #c3e6cb;
+  border-radius: 12px;
+  padding: 18px 24px;
+  max-width: 320px;
+  margin: 0 auto 24px;
+}
+.quiz-completion-rate {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #155724;
+  margin: 0 0 4px;
+}
+.quiz-completion-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #155724;
+  margin: 0;
+}
+.quiz-completion-date-block {
+  margin: 0 auto 24px;
+}
+.quiz-completion-date-label {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+.quiz-completion-date {
+  font-size: 1.25rem;
+  color: var(--heading);
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+.quiz-completion-error {
+  font-size: 0.85rem;
+  color: #c0392b;
+  margin: 0 auto 20px;
+  max-width: 400px;
+  line-height: 1.5;
+}
+.quiz-completion-actions {
+  justify-content: center;
+}
+
 .quiz-home-nav {
   margin-top: 24px;
   text-align: center;
