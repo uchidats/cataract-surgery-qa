@@ -3,7 +3,8 @@
   "use strict";
   const STORAGE_KEY = "cataractSurgeryQaProgressV1";
   const COMPLETION_KEY = "cataractSurgeryQaCompletionV1";
-  const GAS_COMPLETION_URL = "https://script.google.com/macros/s/AKfycbx1kXbC0nZlKK_20kiMAL19j0jmI7WhW78psYutuvygqcFDmuglU77-D57m-nb1g-tK4w/exec";
+  const COMPLETION_API_URL = "https://script.google.com/macros/s/AKfycbx1kXbC0nZlKK_20kiMAL19j0jmI7WhW78psYutuvygqcFDmuglU77-D57m-nb1g-tK4w/exec";
+  const GAS_COMPLETION_URL = COMPLETION_API_URL;
   const MAX_QUESTIONS = 10;
   const get = id => document.getElementById(id);
   const setup = get("quiz-setup");
@@ -492,31 +493,21 @@
   }
 
   async function postCompletionToGas(masteredCount, totalCount) {
-    const payload = JSON.stringify({ masteredCount, totalCount });
     try {
-      const res = await fetch(GAS_COMPLETION_URL, {
+      const response = await fetch(COMPLETION_API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: payload
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          masteredCount,
+          totalCount
+        })
       });
-      if (res.ok) {
-        return await res.json();
-      }
-      return { ok: false, error: `HTTP ${res.status}` };
-    } catch {
-      try {
-        const fallbackRes = await fetch(GAS_COMPLETION_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: payload
-        });
-        if (fallbackRes.ok) {
-          return await fallbackRes.json();
-        }
-        return { ok: false, error: `HTTP ${fallbackRes.status}` };
-      } catch (fallbackErr) {
-        return { ok: false, error: String(fallbackErr) };
-      }
+      const result = await response.json();
+      return result;
+    } catch (err) {
+      return { ok: false, error: String(err) };
     }
   }
 
