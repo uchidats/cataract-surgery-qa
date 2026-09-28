@@ -450,10 +450,12 @@
 
     const params = new URLSearchParams({
       usp: "pp_url",
-      "entry.843181098": question.id,
-      "entry.64528700": question.chapter,
-      "entry.982855707": question.question,
-      "entry.1187832261": formatChoicesForReport(question)
+      "entry.843181098": question.id ?? "",
+      "entry.64528700": question.chapter ?? "",
+      "entry.982855707": question.question ?? "",
+      "entry.1187832261": formatChoicesForReport(question),
+      "entry.455737619": question.feedback ?? "",
+      "entry.389300495": question.source ?? ""
     });
 
     window.open(`${baseUrl}?${params.toString()}`, "_blank", "noopener,noreferrer");
