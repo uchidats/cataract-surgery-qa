@@ -779,8 +779,8 @@ dialog:not([open]) {
   max-width: calc(100vw - 32px);
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--surface);
-  color: var(--text);
+  background: #ffffff;
+  color: #293541;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
   z-index: 1000;
   box-sizing: border-box;
@@ -800,7 +800,7 @@ dialog:not([open]) {
   font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.5;
-  color: var(--heading);
+  color: #1e293b;
   border-bottom: none;
   padding-bottom: 0;
 }
@@ -809,7 +809,7 @@ dialog:not([open]) {
   margin: 0 0 24px;
   font-size: 0.95rem;
   line-height: 1.75;
-  color: var(--text);
+  color: #334155;
 }
 
 .quiz-modal-actions {
@@ -828,6 +828,16 @@ dialog:not([open]) {
   justify-content: center;
   padding: 10px 18px;
   font-size: 0.95rem;
+}
+
+.quiz-modal-actions .button:not(.secondary) {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.quiz-modal-actions .button:not(.secondary):hover {
+  background: var(--accent-dark);
 }
 
 .quiz-modal-actions .button.secondary {
@@ -855,7 +865,36 @@ dialog:not([open]) {
   }
 }
 
-/* ダークモード対応 */
+/* ライトモード明示指定 */
+@media (prefers-color-scheme: light) {
+  .quiz-modal {
+    background: #ffffff;
+    border-color: var(--line);
+    color: #293541;
+  }
+
+  .quiz-modal-title {
+    color: #1e293b;
+  }
+
+  .quiz-modal-desc {
+    color: #334155;
+  }
+
+  .quiz-modal-actions .button:not(.secondary) {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: transparent;
+  }
+
+  .quiz-modal-actions .button.secondary {
+    background: var(--soft-blue);
+    color: var(--accent);
+    border-color: var(--line);
+  }
+}
+
+/* ダークモード対応（端末のカラーモードに連動） */
 @media (prefers-color-scheme: dark) {
   .quiz-modal {
     background: #1e2630;
