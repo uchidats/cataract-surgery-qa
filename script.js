@@ -209,6 +209,44 @@
     }
     return `${num}. ${text}`;
   }
+  function createTableElement(tableData) {
+    if (!tableData) return null;
+    const table = element("table", undefined, "quiz-table");
+
+    if (Array.isArray(tableData.headers) && tableData.headers.length > 0) {
+      const thead = document.createElement("thead");
+      const tr = document.createElement("tr");
+      tableData.headers.forEach(headerText => {
+        const th = element("th", headerText);
+        tr.append(th);
+      });
+      thead.append(tr);
+      table.append(thead);
+    }
+
+    if (Array.isArray(tableData.rows)) {
+      const tbody = document.createElement("tbody");
+      tableData.rows.forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+          const td = document.createElement("td");
+          const str = String(cell ?? "").trim();
+          if (/^[1-9]$/.test(str)) {
+            td.className = "quiz-table-blank-cell";
+            const span = element("span", str, "quiz-table-blank");
+            td.append(span);
+          } else {
+            td.textContent = cell;
+          }
+          tr.append(td);
+        });
+        tbody.append(tr);
+      });
+      table.append(tbody);
+    }
+
+    return table;
+  }
   function showQuestion() {
     answered = false;
     const q = round[position];
@@ -216,6 +254,18 @@
     get("quiz-progress").textContent = `全${round.length}問中 ${position + 1}問目`;
     get("quiz-chapter").textContent = q.chapter;
     get("quiz-question").textContent = q.question;
+
+    const tableContainer = get("quiz-table-container");
+    if (tableContainer) {
+      tableContainer.replaceChildren();
+      if (q.table) {
+        tableContainer.append(createTableElement(q.table));
+        tableContainer.hidden = false;
+      } else {
+        tableContainer.hidden = true;
+      }
+    }
+
     feedback.hidden = true;
     next.hidden = true;
     submit.disabled = true;
@@ -449,14 +499,23 @@
 
       const correctText = correctAnswers.map(i => formatChoiceLabel(q, i)).join("、 ");
 
-      card.append(
-        element("h3", q.question),
+      const cardChildren = [
+        element("h3", q.question)
+      ];
+      if (q.table) {
+        const reviewTableContainer = element("div", undefined, "quiz-table-container");
+        reviewTableContainer.append(createTableElement(q.table));
+        cardChildren.push(reviewTableContainer);
+      }
+      cardChildren.push(
         element("p", verdicts[status]),
         element("p", `あなたの回答：${userText}`),
         element("p", `正解：${correctText}`),
         element("p", q.feedback),
         element("p", q.source ? `『スタンダード白内障手術』 ${q.source}` : `『スタンダード白内障手術』`, "quiz-source")
       );
+
+      card.append(...cardChildren);
       review.append(card);
     }
     get("quiz-score").focus();

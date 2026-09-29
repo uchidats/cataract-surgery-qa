@@ -272,6 +272,58 @@ footer {
 }
 .quiz-card h2 { margin-top: 0; }
 .quiz-card pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+.quiz-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 18px 0 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.quiz-table {
+  width: 100%;
+  min-width: 580px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  text-align: left;
+}
+.quiz-table th,
+.quiz-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  vertical-align: middle;
+}
+.quiz-table th {
+  background: var(--soft-blue);
+  color: var(--heading);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+.quiz-table tbody tr:nth-child(even) {
+  background: rgba(244, 246, 248, 0.45);
+}
+.quiz-table td.quiz-table-blank-cell {
+  text-align: center;
+}
+.quiz-table-blank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.12em;
+  color: var(--heading);
+  background: var(--soft-blue);
+  border: 1.5px solid var(--accent);
+  border-radius: 4px;
+  min-width: 30px;
+  height: 28px;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
 .quiz-card fieldset { min-width: 0; padding: 0; margin: 20px 0 0; border: 0; }
 .quiz-card legend { margin-bottom: 10px; font-weight: 700; }
 .quiz-options { display: grid; gap: 12px; }
@@ -507,6 +559,10 @@ footer {
 @media (max-width: 760px) {
   .quiz-card { padding: 16px; }
   .quiz-option { padding: 12px; }
+  .quiz-table-container { margin: 14px 0 18px; }
+  .quiz-table { font-size: 0.86rem; }
+  .quiz-table th,
+  .quiz-table td { padding: 8px 10px; }
 }
 
 /* カテゴリ・形式選択UI */
