@@ -271,6 +271,21 @@ footer {
   transition: width 0.3s ease;
 }
 .quiz-card h2 { margin-top: 0; }
+#quiz-question,
+.quiz-card h2[tabindex="-1"],
+.quiz-feedback[tabindex="-1"] {
+  outline: none;
+  box-shadow: none;
+}
+#quiz-question:focus,
+#quiz-question:focus-visible,
+.quiz-card h2[tabindex="-1"]:focus,
+.quiz-card h2[tabindex="-1"]:focus-visible,
+.quiz-feedback[tabindex="-1"]:focus,
+.quiz-feedback[tabindex="-1"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
 .quiz-card pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 .quiz-table-container {
   width: 100%;

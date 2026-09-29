@@ -315,7 +315,8 @@
 
     return table;
   }
-  function showQuestion() {
+  function showQuestion(options = {}) {
+    const { autoFocus = true } = options;
     answered = false;
     const q = round[position];
     const isMulti = isMultiChoice(q);
@@ -385,7 +386,9 @@
     unknownLabel.append(unknownInput, element("span", "わからない", "quiz-option-text"));
     get("quiz-options").append(unknownLabel);
 
-    get("quiz-question").focus();
+    if (autoFocus) {
+      get("quiz-question").focus();
+    }
   }
   function start() {
     const { pool } = getCandidatePool();
@@ -878,13 +881,17 @@
       showHomeHintIfNeeded();
     }
 
-    showQuestion();
+    showQuestion({ autoFocus: false });
 
     if (session.answered) {
       const currentResp = responses.find(r => r.question.id === round[position].id) || responses[responses.length - 1];
       if (currentResp) {
         renderAnswerFeedback(currentResp.status, currentResp.selected);
       }
+    }
+
+    if (document.activeElement && document.activeElement === get("quiz-question")) {
+      document.activeElement.blur();
     }
 
     return true;
