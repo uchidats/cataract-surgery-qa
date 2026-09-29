@@ -551,15 +551,17 @@ footer {
   align-items: center;
   gap: 10px;
   margin-left: auto;
-  flex: 0 1 200px;
-  max-width: 220px;
-  min-width: 140px;
+  flex: 0 0 200px;
+  width: 200px;
 }
 .quiz-cat-count {
   font-size: 0.85rem;
   color: var(--muted);
   white-space: nowrap;
   flex-shrink: 0;
+  width: 5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 .quiz-cat-bar-track {
   flex: 1;
@@ -687,9 +689,11 @@ footer {
     min-width: 0;
     margin-left: 0;
     margin-top: 2px;
+    flex: 1 1 auto;
   }
 
   .quiz-cat-count {
+    width: auto;
     margin-left: 0;
     text-align: left;
   }
