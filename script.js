@@ -3,6 +3,8 @@
   "use strict";
   const STORAGE_KEY = "cataractSurgeryQaProgressV1";
   const COMPLETION_KEY = "cataractSurgeryQaCompletionV1";
+  const ACTIVE_SESSION_KEY = "cataractSurgeryQaActiveSessionV1";
+  const HOME_HINT_KEY = "cataractSurgeryQaHomeHintShownV1";
   const COMPLETION_API_URL = "https://script.google.com/macros/s/AKfycbx1kXbC0nZlKK_20kiMAL19j0jmI7WhW78psYutuvygqcFDmuglU77-D57m-nb1g-tK4w/exec";
   const GAS_COMPLETION_URL = COMPLETION_API_URL;
   const MAX_QUESTIONS = 10;
@@ -20,12 +22,75 @@
   const startBtn = get("quiz-start");
   const homeNav = get("quiz-home-nav");
   const homeBtn = get("quiz-home");
+  const homeHint = get("quiz-home-hint");
   const homeDialog = get("quiz-home-dialog");
   const dialogCancelBtn = get("quiz-dialog-cancel");
   const dialogConfirmBtn = get("quiz-dialog-confirm");
   const reportBtn = get("quiz-report");
   const verdicts = { correct: "○ 正解", incorrect: "× 不正解", unknown: "？ わからない" };
   let round = [], position = 0, answered = false, responses = [];
+  let homeHintTimer = null;
+
+  function showHomeHintIfNeeded() {
+    if (!homeHint) return;
+    try {
+      if (localStorage.getItem(HOME_HINT_KEY)) return;
+      localStorage.setItem(HOME_HINT_KEY, "true");
+    } catch {}
+
+    homeHint.hidden = false;
+    requestAnimationFrame(() => {
+      homeHint.classList.add("is-visible");
+    });
+
+    if (homeHintTimer) clearTimeout(homeHintTimer);
+    homeHintTimer = setTimeout(() => {
+      hideHomeHint();
+    }, 4000);
+  }
+
+  function hideHomeHint() {
+    if (homeHintTimer) {
+      clearTimeout(homeHintTimer);
+      homeHintTimer = null;
+    }
+    if (!homeHint || homeHint.hidden) return;
+    homeHint.classList.remove("is-visible");
+    setTimeout(() => {
+      if (homeHint && !homeHint.classList.contains("is-visible")) {
+        homeHint.hidden = true;
+      }
+    }, 300);
+  }
+
+  function saveActiveSession() {
+    if (panel.hidden || round.length === 0) return;
+    const selectedChapters = [...categoryList.querySelectorAll("input:checked")].map(i => i.value);
+    const mode = get("quiz-mode-list").querySelector("input:checked")?.value || "unmastered";
+    const session = {
+      selectedChapters,
+      mode,
+      questionIds: round.map(q => q.id),
+      position,
+      currentQuestionId: round[position]?.id,
+      responses: responses.map(r => ({
+        questionId: r.question.id,
+        selected: r.selected,
+        status: r.status
+      })),
+      answered,
+      savedAt: new Date().toISOString()
+    };
+    try {
+      sessionStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(session));
+    } catch {}
+  }
+
+  function clearActiveSession() {
+    try {
+      sessionStorage.removeItem(ACTIVE_SESSION_KEY);
+    } catch {}
+  }
 
   function storageWarning() {
     get("storage-warning").textContent = "進捗を保存できません。このページを開いている間は学習を続けられます。";
@@ -338,8 +403,12 @@
     result.hidden = true;
     if (completionSection) completionSection.hidden = true;
     panel.hidden = false;
-    if (homeNav) homeNav.hidden = false;
+    if (homeNav) {
+      homeNav.hidden = false;
+      showHomeHintIfNeeded();
+    }
     showQuestion();
+    saveActiveSession();
   }
   form.addEventListener("change", e => {
     if (answered) return;
@@ -366,40 +435,23 @@
       submit.disabled = !selected && !isUnknown;
     }
   });
-  function handleAnswerSubmit(forcedStatus) {
-    if (answered) return;
+  function renderAnswerFeedback(status, userAnswers) {
     answered = true;
-    const q = round[position];
-    const isMulti = isMultiChoice(q);
-    const correctAnswers = getCorrectIndexes(q);
-
-    let status = "";
-    let userAnswers = [];
-
-    if (forcedStatus === "unknown") {
-      status = "unknown";
-    } else if (isMulti) {
-      const checked = [...form.querySelectorAll('input[name="answer"]:checked')];
-      userAnswers = checked.map(input => Number(input.value)).sort((a, b) => a - b);
-      const isCorrect = userAnswers.length === correctAnswers.length &&
-        userAnswers.every((val, i) => val === correctAnswers[i]);
-      status = isCorrect ? "correct" : "incorrect";
-    } else {
-      const selected = form.querySelector('input[name="answer"]:checked');
-      if (!selected) return;
-      if (selected.value === "unknown") {
-        status = "unknown";
-      } else {
-        const val = Number(selected.value);
-        userAnswers = [val];
-        status = val === q.correctIndex ? "correct" : "incorrect";
-      }
-    }
-
-    responses.push({ question: q, selected: status === "unknown" ? "unknown" : userAnswers, status });
-    setRecord(q.id, status);
     choices.disabled = true;
     submit.disabled = true;
+
+    const q = round[position];
+    const correctAnswers = getCorrectIndexes(q);
+
+    if (status === "unknown") {
+      const unknownInput = form.querySelector('input[value="unknown"]');
+      if (unknownInput) unknownInput.checked = true;
+    } else if (Array.isArray(userAnswers)) {
+      userAnswers.forEach(val => {
+        const input = form.querySelector(`input[name="answer"][value="${val}"]`);
+        if (input) input.checked = true;
+      });
+    }
 
     // 回答確定後の選択肢ハイライト
     const optionLabels = get("quiz-options").querySelectorAll(".quiz-option");
@@ -415,7 +467,7 @@
       }
 
       const isCorrect = correctAnswers.includes(index);
-      const isUser = userAnswers.includes(index);
+      const isUser = Array.isArray(userAnswers) && userAnswers.includes(index);
 
       if (isCorrect && isUser) {
         label.classList.add("is-correct", "is-user-selected");
@@ -449,6 +501,40 @@
     feedback.hidden = false;
     next.textContent = position === round.length - 1 ? "結果を見る" : "次の問題";
     next.hidden = false;
+  }
+  function handleAnswerSubmit(forcedStatus) {
+    if (answered) return;
+    const q = round[position];
+    const isMulti = isMultiChoice(q);
+    const correctAnswers = getCorrectIndexes(q);
+
+    let status = "";
+    let userAnswers = [];
+
+    if (forcedStatus === "unknown") {
+      status = "unknown";
+    } else if (isMulti) {
+      const checked = [...form.querySelectorAll('input[name="answer"]:checked')];
+      userAnswers = checked.map(input => Number(input.value)).sort((a, b) => a - b);
+      const isCorrect = userAnswers.length === correctAnswers.length &&
+        userAnswers.every((val, i) => val === correctAnswers[i]);
+      status = isCorrect ? "correct" : "incorrect";
+    } else {
+      const selected = form.querySelector('input[name="answer"]:checked');
+      if (!selected) return;
+      if (selected.value === "unknown") {
+        status = "unknown";
+      } else {
+        const val = Number(selected.value);
+        userAnswers = [val];
+        status = val === q.correctIndex ? "correct" : "incorrect";
+      }
+    }
+
+    responses.push({ question: q, selected: status === "unknown" ? "unknown" : userAnswers, status });
+    setRecord(q.id, status);
+    renderAnswerFeedback(status, userAnswers);
+    saveActiveSession();
     feedback.focus();
   }
   form.addEventListener("submit", event => {
@@ -474,7 +560,12 @@
   next.addEventListener("click", () => {
     if (!answered || panel.hidden) return;
     position++;
-    if (position < round.length) return showQuestion();
+    if (position < round.length) {
+      showQuestion();
+      saveActiveSession();
+      return;
+    }
+    clearActiveSession();
     panel.hidden = true;
     if (checkCompletion()) return;
     result.hidden = false;
@@ -606,6 +697,7 @@
 
   function handleResetAll() {
     if (!confirm("すべての習得履歴・回答履歴をリセットします。よろしいですか？")) return;
+    clearActiveSession();
     progress = {};
     saveProgress();
     clearCompletion();
@@ -635,6 +727,8 @@
   }
 
   function returnToTop() {
+    hideHomeHint();
+    clearActiveSession();
     closeHomeConfirmDialog();
     result.hidden = true;
     panel.hidden = true;
@@ -647,6 +741,7 @@
   get("quiz-restart").addEventListener("click", returnToTop);
   if (homeBtn) {
     homeBtn.addEventListener("click", () => {
+      hideHomeHint();
       if (!panel.hidden) {
         openHomeConfirmDialog();
         return;
@@ -728,16 +823,87 @@
   if (completionResetBtn) {
     completionResetBtn.addEventListener("click", handleResetAll);
   }
+
+  function restoreActiveSession() {
+    let session = null;
+    try {
+      const raw = sessionStorage.getItem(ACTIVE_SESSION_KEY);
+      if (raw) session = JSON.parse(raw);
+    } catch {
+      return false;
+    }
+    if (!session || !Array.isArray(session.questionIds) || session.questionIds.length === 0) {
+      return false;
+    }
+
+    const restoredRound = session.questionIds
+      .map(id => QUESTIONS.find(q => q.id === id))
+      .filter(Boolean);
+
+    if (
+      restoredRound.length === 0 ||
+      typeof session.position !== "number" ||
+      session.position < 0 ||
+      session.position >= restoredRound.length
+    ) {
+      clearActiveSession();
+      return false;
+    }
+
+    // 単元選択とモードの復元
+    if (Array.isArray(session.selectedChapters)) {
+      categoryList.querySelectorAll('input[name="chapter"]').forEach(input => {
+        input.checked = session.selectedChapters.includes(input.value);
+      });
+    }
+    if (session.mode) {
+      const modeInput = get("quiz-mode-list").querySelector(`input[value="${session.mode}"]`);
+      if (modeInput) modeInput.checked = true;
+    }
+
+    round = restoredRound;
+    position = session.position;
+    responses = (session.responses || []).map(r => ({
+      question: QUESTIONS.find(q => q.id === r.questionId),
+      selected: r.selected,
+      status: r.status
+    })).filter(r => r.question);
+
+    setup.hidden = true;
+    result.hidden = true;
+    if (completionSection) completionSection.hidden = true;
+    panel.hidden = false;
+    if (homeNav) {
+      homeNav.hidden = false;
+      showHomeHintIfNeeded();
+    }
+
+    showQuestion();
+
+    if (session.answered) {
+      const currentResp = responses.find(r => r.question.id === round[position].id) || responses[responses.length - 1];
+      if (currentResp) {
+        renderAnswerFeedback(currentResp.status, currentResp.selected);
+      }
+    }
+
+    return true;
+  }
+
   categoryList.addEventListener("change", updatePoolInfo);
   get("quiz-mode-list").addEventListener("change", updatePoolInfo);
   startBtn.addEventListener("click", start);
   updatePoolInfo();
-  if (checkCompletion()) {
-    // 100%達成時は修了画面を表示（setupは非表示）
-  } else {
-    setup.hidden = false;
+
+  const restored = restoreActiveSession();
+  if (!restored) {
+    if (checkCompletion()) {
+      // 100%達成時は修了画面を表示（setupは非表示）
+    } else {
+      setup.hidden = false;
+    }
+    if (homeNav) homeNav.hidden = true;
   }
-  if (homeNav) homeNav.hidden = true;
   get("quiz-unavailable").hidden = true;
 
   // PWA自動インストールプロンプト（ブラウザ標準の自動バナー等）を抑止

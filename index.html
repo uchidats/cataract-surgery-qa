@@ -13,9 +13,9 @@
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
-  <link rel="stylesheet" href="styles.css?v=33">
-  <script src="questions.js?v=31" defer></script>
-  <script src="script.js?v=31" defer></script>
+  <link rel="stylesheet" href="styles.css?v=35">
+  <script src="questions.js?v=35" defer></script>
+  <script src="script.js?v=35" defer></script>
 </head>
 <body>
   <header class="site-header compact"><div class="container">
@@ -99,7 +99,10 @@
       </div>
     </section>
     <div id="quiz-home-nav" class="quiz-home-nav" hidden>
-      <button id="quiz-home" class="quiz-home-button" type="button" title="ホーム" aria-label="ホーム"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
+      <div class="quiz-home-wrapper">
+        <button id="quiz-home" class="quiz-home-button" type="button" title="ホーム" aria-label="ホーム"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
+        <div id="quiz-home-hint" class="quiz-home-hint" role="status" aria-live="polite" hidden>トップ画面へ戻る</div>
+      </div>
     </div>
     <dialog id="quiz-home-dialog" class="quiz-modal" aria-labelledby="quiz-home-dialog-title" aria-describedby="quiz-home-dialog-desc">
       <div class="quiz-modal-inner">
