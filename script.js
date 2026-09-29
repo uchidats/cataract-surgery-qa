@@ -20,6 +20,9 @@
   const startBtn = get("quiz-start");
   const homeNav = get("quiz-home-nav");
   const homeBtn = get("quiz-home");
+  const homeDialog = get("quiz-home-dialog");
+  const dialogCancelBtn = get("quiz-dialog-cancel");
+  const dialogConfirmBtn = get("quiz-dialog-confirm");
   const reportBtn = get("quiz-report");
   const verdicts = { correct: "○ 正解", incorrect: "× 不正解", unknown: "？ わからない" };
   let round = [], position = 0, answered = false, responses = [];
@@ -610,7 +613,29 @@
     returnToTop();
   }
 
+  function openHomeConfirmDialog() {
+    if (!homeDialog) return;
+    if (typeof homeDialog.showModal === "function") {
+      homeDialog.showModal();
+    } else {
+      homeDialog.setAttribute("open", "");
+    }
+    if (dialogCancelBtn) {
+      dialogCancelBtn.focus();
+    }
+  }
+
+  function closeHomeConfirmDialog() {
+    if (!homeDialog) return;
+    if (typeof homeDialog.close === "function") {
+      homeDialog.close();
+    } else {
+      homeDialog.removeAttribute("open");
+    }
+  }
+
   function returnToTop() {
+    closeHomeConfirmDialog();
     result.hidden = true;
     panel.hidden = true;
     if (completionSection) completionSection.hidden = true;
@@ -623,11 +648,33 @@
   if (homeBtn) {
     homeBtn.addEventListener("click", () => {
       if (!panel.hidden) {
-        if (!confirm("問題を解いている途中です。中断してトップ画面に戻りますか？")) {
-          return;
-        }
+        openHomeConfirmDialog();
+        return;
       }
       returnToTop();
+    });
+  }
+  if (dialogCancelBtn) {
+    dialogCancelBtn.addEventListener("click", () => {
+      closeHomeConfirmDialog();
+      if (homeBtn) homeBtn.focus();
+    });
+  }
+  if (dialogConfirmBtn) {
+    dialogConfirmBtn.addEventListener("click", () => {
+      returnToTop();
+    });
+  }
+  if (homeDialog) {
+    homeDialog.addEventListener("click", (e) => {
+      if (e.target === homeDialog) {
+        closeHomeConfirmDialog();
+        if (homeBtn) homeBtn.focus();
+      }
+    });
+    homeDialog.addEventListener("cancel", () => {
+      closeHomeConfirmDialog();
+      if (homeBtn) homeBtn.focus();
     });
   }
   function formatChoicesForReport(question) {
