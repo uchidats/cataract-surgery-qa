@@ -366,10 +366,10 @@
 
       if (isCorrect && isUser) {
         label.classList.add("is-correct", "is-user-selected");
-        label.append(element("span", "✓ 正解", "quiz-option-status quiz-badge-correct"));
+        label.append(element("span", "○ 正解", "quiz-option-status quiz-badge-correct"));
       } else if (isCorrect && !isUser) {
         label.classList.add("is-correct", "is-missed");
-        label.append(element("span", "◯ 正解", "quiz-option-status quiz-badge-correct"));
+        label.append(element("span", "○ 正解", "quiz-option-status quiz-badge-correct"));
       } else if (!isCorrect && isUser) {
         label.classList.add("is-incorrect", "is-user-selected");
         label.append(element("span", "× 誤り", "quiz-option-status quiz-badge-incorrect"));
