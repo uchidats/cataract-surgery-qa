@@ -26,6 +26,9 @@
   const homeDialog = get("quiz-home-dialog");
   const dialogCancelBtn = get("quiz-dialog-cancel");
   const dialogConfirmBtn = get("quiz-dialog-confirm");
+  const resetDialog = get("quiz-reset-dialog");
+  const resetCancelBtn = get("quiz-reset-dialog-cancel");
+  const resetConfirmBtn = get("quiz-reset-dialog-confirm");
   const reportBtn = get("quiz-report");
   const verdicts = { correct: "○ 正解", incorrect: "× 不正解", unknown: "？ わからない" };
   let round = [], position = 0, answered = false, responses = [];
@@ -698,8 +701,72 @@
     return true;
   }
 
-  function handleResetAll() {
-    if (!confirm("すべての習得履歴・回答履歴をリセットします。よろしいですか？")) return;
+  function openModal(dialog, focusEl) {
+    if (!dialog) return;
+    if (typeof dialog.showModal === "function") {
+      dialog.showModal();
+    } else {
+      dialog.setAttribute("open", "");
+    }
+    if (focusEl && typeof focusEl.focus === "function") {
+      focusEl.focus();
+    }
+  }
+
+  function closeModal(dialog, returnFocusEl) {
+    if (!dialog) return;
+    if (typeof dialog.close === "function") {
+      dialog.close();
+    } else {
+      dialog.removeAttribute("open");
+    }
+    if (returnFocusEl && typeof returnFocusEl.focus === "function") {
+      returnFocusEl.focus();
+    }
+  }
+
+  function bindDialogEvents(dialog, cancelBtn, confirmBtn, onClose, onConfirm) {
+    if (!dialog) return;
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", onClose);
+    }
+    if (confirmBtn) {
+      confirmBtn.addEventListener("click", () => {
+        onClose();
+        if (typeof onConfirm === "function") onConfirm();
+      });
+    }
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) {
+        onClose();
+      }
+    });
+    dialog.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      onClose();
+    });
+  }
+
+  function openHomeConfirmDialog() {
+    openModal(homeDialog, dialogCancelBtn);
+  }
+
+  function closeHomeConfirmDialog() {
+    closeModal(homeDialog, homeBtn);
+  }
+
+  let lastResetTrigger = null;
+
+  function openResetConfirmDialog(triggerEl) {
+    lastResetTrigger = triggerEl || null;
+    openModal(resetDialog, resetCancelBtn);
+  }
+
+  function closeResetConfirmDialog() {
+    closeModal(resetDialog, lastResetTrigger);
+  }
+
+  function executeResetAll() {
     clearActiveSession();
     progress = {};
     saveProgress();
@@ -708,31 +775,11 @@
     returnToTop();
   }
 
-  function openHomeConfirmDialog() {
-    if (!homeDialog) return;
-    if (typeof homeDialog.showModal === "function") {
-      homeDialog.showModal();
-    } else {
-      homeDialog.setAttribute("open", "");
-    }
-    if (dialogCancelBtn) {
-      dialogCancelBtn.focus();
-    }
-  }
-
-  function closeHomeConfirmDialog() {
-    if (!homeDialog) return;
-    if (typeof homeDialog.close === "function") {
-      homeDialog.close();
-    } else {
-      homeDialog.removeAttribute("open");
-    }
-  }
-
   function returnToTop() {
     hideHomeHint();
     clearActiveSession();
     closeHomeConfirmDialog();
+    closeResetConfirmDialog();
     result.hidden = true;
     panel.hidden = true;
     if (completionSection) completionSection.hidden = true;
@@ -752,29 +799,8 @@
       returnToTop();
     });
   }
-  if (dialogCancelBtn) {
-    dialogCancelBtn.addEventListener("click", () => {
-      closeHomeConfirmDialog();
-      if (homeBtn) homeBtn.focus();
-    });
-  }
-  if (dialogConfirmBtn) {
-    dialogConfirmBtn.addEventListener("click", () => {
-      returnToTop();
-    });
-  }
-  if (homeDialog) {
-    homeDialog.addEventListener("click", (e) => {
-      if (e.target === homeDialog) {
-        closeHomeConfirmDialog();
-        if (homeBtn) homeBtn.focus();
-      }
-    });
-    homeDialog.addEventListener("cancel", () => {
-      closeHomeConfirmDialog();
-      if (homeBtn) homeBtn.focus();
-    });
-  }
+  bindDialogEvents(homeDialog, dialogCancelBtn, dialogConfirmBtn, closeHomeConfirmDialog, returnToTop);
+  bindDialogEvents(resetDialog, resetCancelBtn, resetConfirmBtn, closeResetConfirmDialog, executeResetAll);
   function formatChoicesForReport(question) {
     if (!Array.isArray(question?.choices)) return "";
     return question.choices.map((choice, index) => {
@@ -810,7 +836,12 @@
       openReportForm(round[position]);
     });
   }
-  get("quiz-reset").addEventListener("click", handleResetAll);
+  const quizResetBtn = get("quiz-reset");
+  if (quizResetBtn) {
+    quizResetBtn.addEventListener("click", (e) => {
+      openResetConfirmDialog(e.currentTarget);
+    });
+  }
   const completionReviewBtn = get("completion-review");
   if (completionReviewBtn) {
     completionReviewBtn.addEventListener("click", () => {
@@ -824,7 +855,9 @@
   }
   const completionResetBtn = get("completion-reset");
   if (completionResetBtn) {
-    completionResetBtn.addEventListener("click", handleResetAll);
+    completionResetBtn.addEventListener("click", (e) => {
+      openResetConfirmDialog(e.currentTarget);
+    });
   }
 
   function restoreActiveSession() {
