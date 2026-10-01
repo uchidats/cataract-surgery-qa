@@ -1386,10 +1386,11 @@ textarea.form-control {
   transform: translateX(-50%) translateY(0);
 }
 .quiz-share-toast {
-  background: #1e633d;
+  background: var(--accent);
+  color: #ffffff;
 }
 .quiz-share-toast::after {
-  border-color: #1e633d transparent transparent transparent;
+  border-color: var(--accent) transparent transparent transparent;
 }
 .quiz-share-toast.is-error {
   background: #c0392b;
