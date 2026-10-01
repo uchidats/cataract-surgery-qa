@@ -14,8 +14,23 @@
   const submitBtn = document.getElementById("suggest-submit-btn");
   const againBtn = document.getElementById("suggest-again-btn");
   const suggestCard = document.getElementById("suggest-card");
+  const clearDraftBtn = document.getElementById("suggest-clear-draft-btn");
+
+  // 添付ファイル関連の要素
+  const fileInput = document.getElementById("suggest-files");
+  const fileSelectBtn = document.getElementById("suggest-file-select-btn");
+  const fileCountText = document.getElementById("suggest-file-count");
+  const fileDraftNotice = document.getElementById("suggest-file-draft-notice");
+  const fileErrorText = document.getElementById("suggest-file-error");
+  const fileList = document.getElementById("suggest-file-list");
 
   if (!form) return;
+
+  const DRAFT_STORAGE_KEY = "cataractSurgeryQaSuggestDraftV1";
+  const SUGGESTION_UPLOAD_FOLDER_ID =
+    "1iUKs8U4igm5RtzVnBS7MSU_TyKZwFybgidStm7_0_bee3Uht-kiVnrUl9BV5_q0lpTjKL2R2";
+  const MAX_FILES = 5;
+  const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB (10,485,760 bytes)
 
   const fields = {
     chapter: document.getElementById("suggest-chapter"),
@@ -34,11 +49,13 @@
     correct: document.getElementById("preview-correct"),
     explanation: document.getElementById("preview-explanation"),
     source: document.getElementById("preview-source"),
-    author: document.getElementById("preview-author")
+    author: document.getElementById("preview-author"),
+    files: document.getElementById("preview-files")
   };
 
   let isSubmitting = false;
   const originalSubmitText = submitBtn ? submitBtn.textContent.trim() : "提案を送信する";
+  let selectedFiles = [];
 
   function clearErrors() {
     if (errorBox) {
@@ -53,10 +70,205 @@
     });
   }
 
-  // 入力時にバリデーションエラーを解除
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  function clearFileError() {
+    if (fileErrorText) {
+      fileErrorText.hidden = true;
+      fileErrorText.textContent = "";
+    }
+  }
+
+  function showFileError(msg) {
+    if (fileErrorText) {
+      fileErrorText.textContent = msg;
+      fileErrorText.hidden = false;
+    }
+  }
+
+  function renderFileList() {
+    if (fileCountText) {
+      fileCountText.textContent = `${selectedFiles.length} / ${MAX_FILES}個 選択中`;
+    }
+    if (!fileList) return;
+
+    fileList.innerHTML = "";
+    selectedFiles.forEach((file, index) => {
+      const li = document.createElement("li");
+      li.className = "file-item";
+
+      const infoDiv = document.createElement("div");
+      infoDiv.className = "file-item-info";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "file-item-name";
+      nameSpan.title = file.name;
+      nameSpan.textContent = file.name;
+
+      const sizeSpan = document.createElement("span");
+      sizeSpan.className = "file-item-size";
+      sizeSpan.textContent = formatFileSize(file.size);
+
+      infoDiv.appendChild(nameSpan);
+      infoDiv.appendChild(sizeSpan);
+
+      const removeBtn = document.createElement("button");
+      removeBtn.type = "button";
+      removeBtn.className = "file-item-remove-btn";
+      removeBtn.setAttribute("aria-label", `${file.name} を削除`);
+      removeBtn.title = "このファイルを削除";
+      removeBtn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      `;
+
+      removeBtn.addEventListener("click", () => {
+        if (isSubmitting) return;
+        selectedFiles.splice(index, 1);
+        renderFileList();
+        clearFileError();
+        saveDraft();
+      });
+
+      li.appendChild(infoDiv);
+      li.appendChild(removeBtn);
+      fileList.appendChild(li);
+    });
+  }
+
+  if (fileSelectBtn && fileInput) {
+    fileSelectBtn.addEventListener("click", () => {
+      if (isSubmitting) return;
+      fileInput.click();
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener("change", () => {
+      clearFileError();
+      const newFiles = Array.from(fileInput.files || []);
+      if (newFiles.length === 0) return;
+
+      const errors = [];
+
+      for (const file of newFiles) {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
+          errors.push(`「${file.name}」は10MBを超えているため添付できません。`);
+          continue;
+        }
+
+        if (selectedFiles.length >= MAX_FILES) {
+          errors.push(`添付できるファイルは最大${MAX_FILES}個までです。`);
+          break;
+        }
+
+        // 同一ファイル重複チェック
+        const isDuplicate = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+        if (isDuplicate) continue;
+
+        selectedFiles.push(file);
+      }
+
+      if (errors.length > 0) {
+        showFileError(errors.join(" "));
+      }
+
+      if (fileDraftNotice && !fileDraftNotice.hidden) {
+        fileDraftNotice.hidden = true;
+      }
+
+      fileInput.value = "";
+      renderFileList();
+      saveDraft();
+    });
+  }
+
+  // 下書きの自動保存（Fileオブジェクト自体は保存せず、選択有無のみ保持）
+  function saveDraft() {
+    try {
+      const draft = {
+        chapter: fields.chapter ? fields.chapter.value : "",
+        question: fields.question ? fields.question.value : "",
+        choices: fields.choices ? fields.choices.value : "",
+        correct: fields.correct ? fields.correct.value : "",
+        explanation: fields.explanation ? fields.explanation.value : "",
+        source: fields.source ? fields.source.value : "",
+        author: fields.author ? fields.author.value : "",
+        hasAttachments: selectedFiles.length > 0
+      };
+
+      const hasContent =
+        Object.entries(draft).some(([k, val]) => k !== "hasAttachments" && typeof val === "string" && val.trim().length > 0) ||
+        draft.hasAttachments;
+
+      if (hasContent) {
+        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
+      } else {
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+      }
+    } catch (err) {
+      console.warn("Failed to save draft to localStorage:", err);
+    }
+  }
+
+  // 下書きの削除
+  function clearDraft() {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+    } catch (err) {
+      console.warn("Failed to remove draft from localStorage:", err);
+    }
+  }
+
+  // 下書きの自動復元
+  function restoreDraft() {
+    try {
+      const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      if (!draft || typeof draft !== "object") return;
+
+      if (typeof draft.chapter === "string" && fields.chapter) {
+        fields.chapter.value = draft.chapter;
+      }
+      if (typeof draft.question === "string" && fields.question) {
+        fields.question.value = draft.question;
+      }
+      if (typeof draft.choices === "string" && fields.choices) {
+        fields.choices.value = draft.choices;
+      }
+      if (typeof draft.correct === "string" && fields.correct) {
+        fields.correct.value = draft.correct;
+      }
+      if (typeof draft.explanation === "string" && fields.explanation) {
+        fields.explanation.value = draft.explanation;
+      }
+      if (typeof draft.source === "string" && fields.source) {
+        fields.source.value = draft.source;
+      }
+      if (typeof draft.author === "string" && fields.author) {
+        fields.author.value = draft.author;
+      }
+
+      // 下書き保存時にファイルが添付されていた場合、再選択を促す案内を表示
+      if (draft.hasAttachments && fileDraftNotice) {
+        fileDraftNotice.hidden = false;
+      }
+    } catch (err) {
+      console.warn("Failed to restore draft from localStorage:", err);
+    }
+  }
+
+  // 入力時にバリデーションエラーを解除＆下書き自動保存
   Object.values(fields).forEach(input => {
     if (!input) return;
-    input.addEventListener("input", () => {
+    const handleFieldChange = () => {
       if (input.classList.contains("is-invalid")) {
         input.classList.remove("is-invalid");
         input.removeAttribute("aria-invalid");
@@ -64,8 +276,67 @@
       if (errorBox && !errorBox.hidden) {
         errorBox.hidden = true;
       }
-    });
+      saveDraft();
+    };
+
+    input.addEventListener("input", handleFieldChange);
+    input.addEventListener("change", handleFieldChange);
   });
+
+  // Base64読み取り関数
+  function readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result || "";
+        const base64Index = result.indexOf(";base64,");
+        if (base64Index !== -1) {
+          resolve(result.substring(base64Index + 8));
+        } else {
+          const commaIndex = result.indexOf(",");
+          resolve(commaIndex !== -1 ? result.substring(commaIndex + 1) : result);
+        }
+      };
+      reader.onerror = () => reject(reader.error || new Error("ファイルの読み込みに失敗しました。"));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // 1ファイルずつGASへアップロード
+  async function uploadFileToGas(file) {
+    const base64Data = await readFileAsBase64(file);
+    const payload = {
+      action: "uploadFile",
+      folderId: SUGGESTION_UPLOAD_FOLDER_ID,
+      fileName: file.name,
+      mimeType: file.type || "application/octet-stream",
+      fileSize: file.size,
+      base64Data: base64Data
+    };
+
+    const response = await fetch(SUGGEST_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    if (!data || data.ok === false) {
+      throw new Error(data && data.error ? data.error : "GAS upload error");
+    }
+
+    return {
+      fileId: data.fileId,
+      fileName: data.fileName || file.name,
+      fileUrl: data.fileUrl
+    };
+  }
 
   // GAS Web APIへのPOST送信
   async function postSuggestionToGas(payload) {
@@ -100,6 +371,7 @@
     if (isSubmitting) return;
 
     clearErrors();
+    clearFileError();
 
     const errors = [];
     let firstInvalidField = null;
@@ -157,35 +429,67 @@
       return;
     }
 
-    const payload = {
-      chapter: fields.chapter.value.trim(),
-      question: fields.question.value.trim(),
-      choices: fields.choices.value.trim(),
-      correct: fields.correct.value.trim(),
-      explanation: fields.explanation.value.trim(),
-      source: fields.source.value.trim(),
-      author: fields.author.value.trim(),
-
-      // GAS側で日本語キーを直接扱う場合にも対応
-      "単元": fields.chapter.value.trim(),
-      "問題文案": fields.question.value.trim(),
-      "選択肢案": fields.choices.value.trim(),
-      "正解": fields.correct.value.trim(),
-      "解説案": fields.explanation.value.trim(),
-      "参照ページ": fields.source.value.trim(),
-      "提案者名": fields.author.value.trim(),
-      submittedAt: new Date().toISOString()
-    };
-
     // 送信中状態（ボタン無効化・テキスト変更）
     isSubmitting = true;
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = "送信しています…";
+    }
+    if (fileSelectBtn) {
+      fileSelectBtn.disabled = true;
     }
 
+    const uploadedFiles = [];
+
     try {
+      // 1ファイルずつ順番にアップロード
+      if (selectedFiles.length > 0) {
+        for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i];
+          if (submitBtn) {
+            submitBtn.textContent = `ファイルをアップロードしています ${i + 1} / ${selectedFiles.length}`;
+          }
+          const uploaded = await uploadFileToGas(file);
+          uploadedFiles.push(uploaded);
+        }
+      }
+
+      // 全ファイルアップロード成功後に問題提案本文を送信
+      if (submitBtn) {
+        submitBtn.textContent = "提案を送信しています…";
+      }
+
+      const payload = {
+        action: "submitSuggestion",
+        chapter: fields.chapter.value.trim(),
+        question: fields.question.value.trim(),
+        choices: fields.choices.value.trim(),
+        correct: fields.correct.value.trim(),
+        explanation: fields.explanation.value.trim(),
+        source: fields.source.value.trim(),
+        author: fields.author.value.trim(),
+
+        // 添付ファイル情報
+        files: uploadedFiles,
+        attachmentsSummary: uploadedFiles.map(f => `${f.fileName} (${f.fileUrl})`).join("\n"),
+
+        // GAS側で日本語キーを直接扱う場合にも対応
+        "単元": fields.chapter.value.trim(),
+        "問題文案": fields.question.value.trim(),
+        "選択肢案": fields.choices.value.trim(),
+        "正解": fields.correct.value.trim(),
+        "解説案": fields.explanation.value.trim(),
+        "参照ページ": fields.source.value.trim(),
+        "提案者名": fields.author.value.trim(),
+        "添付ファイル": uploadedFiles.map(f => f.fileUrl).join("\n"),
+        submittedAt: new Date().toISOString()
+      };
+
       await postSuggestionToGas(payload);
+
+      // 送信成功時のみ文章の下書きを削除
+      clearDraft();
+      selectedFiles = [];
+      renderFileList();
 
       // 送信成功時：プレビュー内容をセットして完了画面へ切り替え
       if (previews.chapter) previews.chapter.textContent = payload.chapter;
@@ -196,6 +500,26 @@
       if (previews.source) previews.source.textContent = payload.source || "（未記入）";
       if (previews.author) previews.author.textContent = payload.author || "（匿名）";
 
+      if (previews.files) {
+        if (uploadedFiles.length > 0) {
+          const ul = document.createElement("ul");
+          ul.className = "preview-files-list";
+          uploadedFiles.forEach(f => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = f.fileUrl;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.textContent = f.fileName;
+            li.appendChild(a);
+            ul.appendChild(li);
+          });
+          previews.files.replaceChildren(ul);
+        } else {
+          previews.files.textContent = "（なし）";
+        }
+      }
+
       form.hidden = true;
       if (successView) {
         successView.hidden = false;
@@ -205,10 +529,13 @@
         suggestCard.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     } catch (err) {
-      // 送信失敗時：入力内容は消さずにエラーメッセージを表示
       console.error("Suggestion submission failed:", err);
       if (errorBox) {
-        errorBox.textContent = "送信に失敗しました。時間をおいて再度お試しください。";
+        if (uploadedFiles.length < selectedFiles.length && selectedFiles.length > 0) {
+          errorBox.textContent = "添付ファイルのアップロードに失敗しました。再度お試しください。";
+        } else {
+          errorBox.textContent = "送信に失敗しました。時間をおいて再度お試しください。";
+        }
         errorBox.hidden = false;
         errorBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
       }
@@ -218,11 +545,37 @@
         submitBtn.disabled = false;
         submitBtn.textContent = originalSubmitText;
       }
+      if (fileSelectBtn) {
+        fileSelectBtn.disabled = false;
+      }
     }
   });
 
+  // 「下書きを削除」ボタンのイベント
+  if (clearDraftBtn) {
+    clearDraftBtn.addEventListener("click", () => {
+      const confirmed = window.confirm(
+        "保存されている下書きを削除しますか？\n入力中の内容はすべて消去されます。"
+      );
+      if (!confirmed) return;
+
+      clearDraft();
+      selectedFiles = [];
+      renderFileList();
+      clearFileError();
+      if (fileDraftNotice) fileDraftNotice.hidden = true;
+      form.reset();
+      clearErrors();
+    });
+  }
+
   if (againBtn) {
     againBtn.addEventListener("click", () => {
+      clearDraft();
+      selectedFiles = [];
+      renderFileList();
+      clearFileError();
+      if (fileDraftNotice) fileDraftNotice.hidden = true;
       form.reset();
       clearErrors();
       if (successView) successView.hidden = true;
@@ -230,4 +583,7 @@
       if (fields.chapter) fields.chapter.focus();
     });
   }
+
+  // 初期化時に保存済み下書きを復元
+  restoreDraft();
 })();
