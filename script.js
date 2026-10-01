@@ -942,6 +942,158 @@
   }
   get("quiz-unavailable").hidden = true;
 
+  // ==========================================================================
+  // このQ&Aを共有 (QRコードモーダル・リンクコピー・初回ヒント)
+  // ==========================================================================
+  const SHARE_HINT_KEY = "cataractSurgeryQaShareHintShownV1";
+  const shareQrBtn = get("quiz-share-qr-btn");
+  const shareCopyBtn = get("quiz-share-copy-btn");
+  const shareQrDialog = get("quiz-qr-dialog");
+  const shareQrDialogClose = get("quiz-qr-dialog-close");
+  const shareQrContainer = get("quiz-share-qr-code");
+  const shareQrHint = get("quiz-share-qr-hint");
+  const shareCopyHint = get("quiz-share-copy-hint");
+  const shareToast = get("quiz-share-toast");
+  let qrGenerated = false;
+  let shareToastTimer = null;
+  let shareHintsTimer = null;
+
+  function showShareToast(message, isError = false) {
+    if (!shareToast) return;
+    if (shareToastTimer) {
+      clearTimeout(shareToastTimer);
+      shareToastTimer = null;
+    }
+    shareToast.textContent = message;
+    shareToast.classList.toggle("is-error", isError);
+    shareToast.hidden = false;
+    requestAnimationFrame(() => {
+      shareToast.classList.add("is-visible");
+    });
+    shareToastTimer = setTimeout(() => {
+      shareToast.classList.remove("is-visible");
+      setTimeout(() => {
+        shareToast.hidden = true;
+        shareToast.classList.remove("is-error");
+        shareToastTimer = null;
+      }, 300);
+    }, 2800);
+  }
+
+  function showShareHintsIfNeeded() {
+    if (!shareQrHint || !shareCopyHint) return;
+    try {
+      if (localStorage.getItem(SHARE_HINT_KEY)) return;
+      localStorage.setItem(SHARE_HINT_KEY, "true");
+    } catch {}
+
+    shareQrHint.hidden = false;
+    shareCopyHint.hidden = false;
+    requestAnimationFrame(() => {
+      shareQrHint.classList.add("is-visible");
+      shareCopyHint.classList.add("is-visible");
+    });
+
+    if (shareHintsTimer) clearTimeout(shareHintsTimer);
+    shareHintsTimer = setTimeout(() => {
+      hideShareHints();
+    }, 3800);
+  }
+
+  function hideShareHints() {
+    if (shareHintsTimer) {
+      clearTimeout(shareHintsTimer);
+      shareHintsTimer = null;
+    }
+    if (shareQrHint) {
+      shareQrHint.classList.remove("is-visible");
+      setTimeout(() => { shareQrHint.hidden = true; }, 300);
+    }
+    if (shareCopyHint) {
+      shareCopyHint.classList.remove("is-visible");
+      setTimeout(() => { shareCopyHint.hidden = true; }, 300);
+    }
+  }
+
+  function getShareUrl() {
+    try {
+      const url = new URL(window.location.href);
+      return `${url.origin}${url.pathname}`;
+    } catch {
+      return window.location.href.split("?")[0].split("#")[0];
+    }
+  }
+
+  function renderQrCode() {
+    if (qrGenerated || !shareQrContainer) return;
+    const url = getShareUrl();
+    if (typeof window.qrcode === "function") {
+      try {
+        const qr = window.qrcode(0, "M");
+        qr.addData(url);
+        qr.make();
+        shareQrContainer.innerHTML = qr.createSvgTag(5, 10);
+        qrGenerated = true;
+      } catch (err) {
+        console.error("QR Code generation error:", err);
+        shareQrContainer.textContent = "QRコードの生成に失敗しました。";
+      }
+    } else {
+      shareQrContainer.textContent = "QRコード生成機能を読み込めませんでした。";
+    }
+  }
+
+  function openQrModal() {
+    hideShareHints();
+    renderQrCode();
+    openModal(shareQrDialog, shareQrDialogClose);
+  }
+
+  function closeQrModal() {
+    closeModal(shareQrDialog, shareQrBtn);
+  }
+
+  if (shareQrBtn) {
+    shareQrBtn.addEventListener("click", openQrModal);
+  }
+
+  if (shareQrDialog) {
+    bindDialogEvents(shareQrDialog, shareQrDialogClose, null, closeQrModal, null);
+  }
+
+  if (shareCopyBtn) {
+    shareCopyBtn.addEventListener("click", async () => {
+      hideShareHints();
+      const url = getShareUrl();
+      try {
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+          await navigator.clipboard.writeText(url);
+          showShareToast("リンクをコピーしました");
+        } else {
+          const tempInput = document.createElement("input");
+          tempInput.value = url;
+          tempInput.style.position = "fixed";
+          tempInput.style.opacity = "0";
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          const successful = document.execCommand("copy");
+          document.body.removeChild(tempInput);
+          if (successful) {
+            showShareToast("リンクをコピーしました");
+          } else {
+            showShareToast("コピーに失敗しました", true);
+          }
+        }
+      } catch (err) {
+        console.error("Clipboard copy error:", err);
+        showShareToast("コピーに失敗しました", true);
+      }
+    });
+  }
+
+  // トップ画面表示時に初回ヒントを表示
+  showShareHintsIfNeeded();
+
   // PWA自動インストールプロンプト（ブラウザ標準の自動バナー等）を抑止
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();

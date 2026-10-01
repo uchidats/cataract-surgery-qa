@@ -13,9 +13,10 @@
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
-  <link rel="stylesheet" href="styles.css?v=41">
+  <link rel="stylesheet" href="styles.css?v=42">
   <script src="questions.js?v=41" defer></script>
-  <script src="script.js?v=41" defer></script>
+  <script src="qrcode.min.js" defer></script>
+  <script src="script.js?v=42" defer></script>
 </head>
 <body>
   <header class="site-header compact"><div class="container">
@@ -50,6 +51,21 @@
         <button id="quiz-start" class="button" type="button">テストを開始</button>
         <button id="quiz-reset" class="button secondary" type="button">進捗をリセット</button>
         <a id="quiz-propose" class="button secondary" href="suggest.html">新しい問題を提案</a>
+        <div class="quiz-share-icons-group">
+          <div class="quiz-share-icon-wrapper">
+            <button id="quiz-share-qr-btn" class="quiz-share-icon-btn" type="button" title="QRコードで共有" aria-label="QRコードで共有">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </button>
+            <div id="quiz-share-qr-hint" class="quiz-share-hint" role="status" aria-live="polite" hidden>QRコードで共有</div>
+          </div>
+          <div class="quiz-share-icon-wrapper">
+            <button id="quiz-share-copy-btn" class="quiz-share-icon-btn" type="button" title="リンクをコピー" aria-label="リンクをコピー">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+            <div id="quiz-share-copy-hint" class="quiz-share-hint" role="status" aria-live="polite" hidden>リンクをコピー</div>
+            <div id="quiz-share-toast" class="quiz-share-toast" role="status" aria-live="polite" hidden>リンクをコピーしました</div>
+          </div>
+        </div>
       </div>
     </section>
     <section id="quiz-panel" class="quiz-card" aria-labelledby="quiz-question" hidden>
@@ -122,6 +138,18 @@
         <div class="quiz-modal-actions">
           <button id="quiz-reset-dialog-cancel" class="button secondary" type="button">キャンセル</button>
           <button id="quiz-reset-dialog-confirm" class="button" type="button">リセットする</button>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="quiz-qr-dialog" class="quiz-modal" aria-labelledby="quiz-qr-dialog-title">
+      <div class="quiz-modal-inner quiz-qr-dialog-inner">
+        <h2 id="quiz-qr-dialog-title" class="quiz-modal-title">QRコードで共有</h2>
+        <div class="quiz-share-qr-box">
+          <div id="quiz-share-qr-code" class="quiz-share-qr-code" role="img" aria-label="白内障手術Q&amp;AのURLのQRコード"></div>
+          <p class="quiz-share-qr-desc">スマホのカメラ等で読み取ってアクセスできます</p>
+        </div>
+        <div class="quiz-modal-actions quiz-qr-dialog-actions">
+          <button id="quiz-qr-dialog-close" class="button secondary" type="button">閉じる</button>
         </div>
       </div>
     </dialog>
