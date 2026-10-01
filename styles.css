@@ -497,6 +497,11 @@ footer {
   justify-content: flex-end;
   margin-left: auto;
 }
+.quiz-links-right-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
 .quiz-review { display: grid; gap: 16px; }
 .quiz-review-card { min-width: 0; }
 .quiz-review-card h3 { margin-top: 0; }
@@ -848,24 +853,31 @@ footer {
     align-items: stretch;
     gap: 12px;
   }
-  .quiz-setup-links .quiz-links-group {
+  .quiz-setup-links .quiz-links-left {
+    width: 100%;
+    margin-left: 0;
+  }
+  .quiz-setup-links .quiz-links-left .button {
+    width: 100%;
+  }
+  .quiz-setup-links .quiz-links-right {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
     margin-left: 0;
     gap: 12px;
   }
-  .quiz-setup-links .quiz-links-left .button {
+  .quiz-setup-links .quiz-links-right #quiz-reset {
     width: 100%;
   }
-  .quiz-setup-links .quiz-links-right {
-    flex-direction: row;
-    flex-wrap: nowrap;
+  .quiz-setup-links .quiz-links-right-sub {
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
+    width: 100%;
   }
-  .quiz-setup-links .quiz-links-right #quiz-propose {
+  .quiz-setup-links .quiz-links-right-sub #quiz-propose {
     flex: 1 1 auto;
     width: auto;
   }
