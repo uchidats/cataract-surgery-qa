@@ -7,6 +7,8 @@
   const HOME_HINT_KEY = "cataractSurgeryQaHomeHintShownV1";
   const COMPLETION_API_URL = "https://script.google.com/macros/s/AKfycbx1kXbC0nZlKK_20kiMAL19j0jmI7WhW78psYutuvygqcFDmuglU77-D57m-nb1g-tK4w/exec";
   const GAS_COMPLETION_URL = COMPLETION_API_URL;
+  const PROPOSE_QUESTION_FORM_URL =
+    "https://docs.google.com/forms/d/e/1FAIpQLScjY2guk2a2AfddH47dAgxciu9kdqsIo0yW0f1vG75okuJrjA/viewform?usp=publish-editor";
   const MAX_QUESTIONS = 10;
   const get = id => document.getElementById(id);
   const setup = get("quiz-setup");
@@ -30,6 +32,7 @@
   const resetCancelBtn = get("quiz-reset-dialog-cancel");
   const resetConfirmBtn = get("quiz-reset-dialog-confirm");
   const reportBtn = get("quiz-report");
+  const proposeBtn = get("quiz-propose");
   const verdicts = { correct: "○ 正解", incorrect: "× 不正解", unknown: "？ わからない" };
   let round = [], position = 0, answered = false, responses = [];
   let homeHintTimer = null;
@@ -840,6 +843,11 @@
   if (quizResetBtn) {
     quizResetBtn.addEventListener("click", (e) => {
       openResetConfirmDialog(e.currentTarget);
+    });
+  }
+  if (proposeBtn) {
+    proposeBtn.addEventListener("click", () => {
+      window.open(PROPOSE_QUESTION_FORM_URL, "_blank", "noopener,noreferrer");
     });
   }
   const completionReviewBtn = get("completion-review");
