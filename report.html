@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#245880">
+  <title>問題を報告｜白内障手術 Q&amp;A</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v=28">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
+  <link rel="stylesheet" href="styles.css?v=41">
+  <script src="questions.js?v=41" defer></script>
+  <script src="report.js?v=41" defer></script>
+</head>
+<body>
+  <header class="site-header compact">
+    <div class="container">
+      <a class="site-title" href="index.html">白内障手術 Q&amp;A</a>
+      <p class="tagline">手術を始める前に習得したい基礎知識</p>
+    </div>
+  </header>
+
+  <main class="quiz-page">
+    <div class="container narrow">
+      <nav class="suggest-nav" aria-label="パンくずリスト">
+        <a href="index.html" class="suggest-back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>クイズに戻る</span>
+        </a>
+      </nav>
+
+      <section id="report-card" class="quiz-card suggest-card" aria-labelledby="report-heading">
+        <h1 id="report-heading" class="suggest-title">問題を報告</h1>
+
+        <div class="suggest-intro">
+          <p class="suggest-lead">問題の誤りや改善案、表現の修正提案を受け付けています。</p>
+          <p class="suggest-note">ご協力ありがとうございます。いただいた報告をもとに問題内容を見直し、改善いたします。</p>
+        </div>
+
+        <section id="report-target-box" class="report-target-box" aria-labelledby="report-target-heading">
+          <h2 id="report-target-heading" class="report-target-heading">対象の問題情報</h2>
+          <div id="report-no-target" class="report-no-target" hidden>
+            <p>※ 問題情報が渡されていません。クイズ出題中の「問題を報告」ボタンから開いてください。</p>
+          </div>
+          <dl id="report-target-dl" class="report-target-dl">
+            <div class="report-target-row">
+              <dt>問題ID</dt>
+              <dd id="report-target-id">-</dd>
+            </div>
+            <div class="report-target-row">
+              <dt>単元</dt>
+              <dd id="report-target-chapter">-</dd>
+            </div>
+            <div class="report-target-row">
+              <dt>問題文</dt>
+              <dd id="report-target-question" class="report-target-content">-</dd>
+            </div>
+            <div class="report-target-row">
+              <dt>選択肢</dt>
+              <dd id="report-target-choices" class="report-target-content">-</dd>
+            </div>
+            <div class="report-target-row">
+              <dt>解説</dt>
+              <dd id="report-target-feedback" class="report-target-content">-</dd>
+            </div>
+            <div class="report-target-row">
+              <dt>参照ページ</dt>
+              <dd id="report-target-source">-</dd>
+            </div>
+          </dl>
+        </section>
+
+        <form id="report-form" class="suggest-form" novalidate>
+          <div id="report-form-error" class="suggest-form-error" role="alert" aria-live="polite" hidden></div>
+
+          <fieldset class="form-group form-radiogroup" aria-describedby="report-type-help">
+            <legend class="form-label">
+              報告内容の種類
+              <span class="badge badge-required">必須</span>
+            </legend>
+            <div class="report-radio-options" id="report-type-options">
+              <label class="report-radio-option">
+                <input type="radio" name="type" value="問題文に間違いがある" required>
+                <span>問題文に間違いがある</span>
+              </label>
+              <label class="report-radio-option">
+                <input type="radio" name="type" value="選択肢に間違いがある">
+                <span>選択肢に間違いがある</span>
+              </label>
+              <label class="report-radio-option">
+                <input type="radio" name="type" value="解説に間違いがある">
+                <span>解説に間違いがある</span>
+              </label>
+              <label class="report-radio-option">
+                <input type="radio" name="type" value="参照ページに間違いがある">
+                <span>参照ページに間違いがある</span>
+              </label>
+              <label class="report-radio-option">
+                <input type="radio" name="type" value="その他">
+                <span>その他</span>
+              </label>
+            </div>
+            <p id="report-type-help" class="form-help">該当する報告の種類を選択してください。</p>
+          </fieldset>
+
+          <div class="form-group">
+            <label for="report-details" class="form-label">
+              詳細
+              <span class="badge badge-required">必須</span>
+            </label>
+            <textarea id="report-details" name="details" class="form-control" rows="5" placeholder="具体的な誤りの箇所や、修正・改善の提案内容をご記入ください。" required aria-describedby="report-details-help"></textarea>
+            <p id="report-details-help" class="form-help">問題のどの部分にどのような誤りがあるか、または改善案をご入力ください。</p>
+          </div>
+
+          <div class="suggest-actions">
+            <button type="submit" id="report-submit-btn" class="button">報告を送信する</button>
+            <a href="index.html" class="button secondary">キャンセル</a>
+          </div>
+        </form>
+
+        <div id="report-success-view" class="suggest-success-view" hidden>
+          <div class="suggest-success-icon" aria-hidden="true">✓</div>
+          <h2 class="suggest-success-title">問題を報告しました</h2>
+          <p class="suggest-success-desc">
+            ご報告ありがとうございます！<br>
+            内容を確認し、問題の品質向上に役立たせていただきます。
+          </p>
+
+          <div class="suggest-preview-card">
+            <h3 class="suggest-preview-heading">報告内容の確認</h3>
+            <dl class="suggest-preview-list">
+              <div class="suggest-preview-row">
+                <dt>対象問題ID</dt>
+                <dd id="preview-report-id">-</dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>報告の種類</dt>
+                <dd id="preview-report-type">-</dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>詳細</dt>
+                <dd id="preview-report-details">-</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="suggest-actions suggest-success-actions">
+            <a href="index.html" class="button">クイズに戻る</a>
+            <button type="button" id="report-again-btn" class="button secondary">内容を修正する</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 白内障手術 Q&amp;A. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

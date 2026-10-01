@@ -10,8 +10,8 @@
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
-  <link rel="stylesheet" href="styles.css?v=40">
-  <script src="suggest.js?v=40" defer></script>
+  <link rel="stylesheet" href="styles.css?v=41">
+  <script src="suggest.js?v=41" defer></script>
 </head>
 <body>
   <header class="site-header compact">
@@ -95,19 +95,19 @@
           <div class="form-group">
             <label for="suggest-explanation" class="form-label">
               解説案
-              <span class="badge badge-optional">任意</span>
+              <span class="badge badge-required">必須</span>
             </label>
-            <textarea id="suggest-explanation" name="explanation" class="form-control" rows="4" placeholder="例：上方切開の場合、やや顎が下がった状態（chin down）のとき手術が最もやりづらい。なぜなら〜〜" aria-describedby="suggest-explanation-help"></textarea>
-            <p id="suggest-explanation-help" class="form-help">正解・不正解の理由や、臨床上のポイントなどがあればご入力ください。</p>
+            <textarea id="suggest-explanation" name="explanation" class="form-control" rows="4" placeholder="例：上方切開の場合、やや顎が下がった状態（chin down）のとき手術が最もやりづらい。なぜなら〜〜" required aria-describedby="suggest-explanation-help"></textarea>
+            <p id="suggest-explanation-help" class="form-help">正解・不正解の理由や、臨床上のポイントなどをご入力ください。</p>
           </div>
 
           <div class="form-group">
             <label for="suggest-source" class="form-label">
               参照ページ
-              <span class="badge badge-optional">任意</span>
+              <span class="badge badge-required">必須</span>
             </label>
-            <input type="text" id="suggest-source" name="source" class="form-control" placeholder="例：『スタンダード白内障手術』p.23" aria-describedby="suggest-source-help">
-            <p id="suggest-source-help" class="form-help">書籍の該当ページや参考文献があればご入力ください。</p>
+            <input type="text" id="suggest-source" name="source" class="form-control" placeholder="例：『スタンダード白内障手術』p.23" required aria-describedby="suggest-source-help">
+            <p id="suggest-source-help" class="form-help">書籍の該当ページをご入力ください。</p>
           </div>
 
           <div class="form-group">

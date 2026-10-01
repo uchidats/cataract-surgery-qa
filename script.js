@@ -816,20 +816,16 @@
 
   function openReportForm(question) {
     if (!question) return;
-    const baseUrl =
-      "https://docs.google.com/forms/d/e/1FAIpQLSe4ajqntE-ZyqbJ8jgaL8_tZJsM0ivYvDYEO6CiRiux5C7eeQ/viewform";
-
     const params = new URLSearchParams({
-      usp: "pp_url",
-      "entry.843181098": question.id ?? "",
-      "entry.64528700": question.chapter ?? "",
-      "entry.982855707": question.question ?? "",
-      "entry.1187832261": formatChoicesForReport(question),
-      "entry.455737619": question.feedback ?? "",
-      "entry.389300495": question.source ?? ""
+      id: question.id ?? "",
+      chapter: question.chapter ?? "",
+      question: question.question ?? "",
+      choices: formatChoicesForReport(question),
+      feedback: question.feedback ?? "",
+      source: question.source ?? ""
     });
 
-    window.open(`${baseUrl}?${params.toString()}`, "_blank", "noopener,noreferrer");
+    window.open(`report.html?${params.toString()}`, "_blank", "noopener,noreferrer");
   }
   if (reportBtn) {
     reportBtn.addEventListener("click", () => {

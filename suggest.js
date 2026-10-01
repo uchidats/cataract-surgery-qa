@@ -132,6 +132,20 @@
       if (!firstInvalidField) firstInvalidField = fields.correct;
     }
 
+    if (!fields.explanation.value.trim()) {
+      errors.push("解説案を入力してください。");
+      fields.explanation.classList.add("is-invalid");
+      fields.explanation.setAttribute("aria-invalid", "true");
+      if (!firstInvalidField) firstInvalidField = fields.explanation;
+    }
+
+    if (!fields.source.value.trim()) {
+      errors.push("参照ページを入力してください。");
+      fields.source.classList.add("is-invalid");
+      fields.source.setAttribute("aria-invalid", "true");
+      if (!firstInvalidField) firstInvalidField = fields.source;
+    }
+
     if (errors.length > 0) {
       if (errorBox) {
         errorBox.textContent = errors.join(" ");
