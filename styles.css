@@ -475,6 +475,28 @@ footer {
   line-height: normal;
   text-align: center;
 }
+
+/* トップ画面ボタン群：PC表示は左右分割（左：テスト系、右：提案・共有系） */
+.quiz-setup-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+.quiz-links-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.quiz-links-left {
+  justify-content: flex-start;
+}
+.quiz-links-right {
+  justify-content: flex-end;
+  margin-left: auto;
+}
 .quiz-review { display: grid; gap: 16px; }
 .quiz-review-card { min-width: 0; }
 .quiz-review-card h3 { margin-top: 0; }
@@ -821,10 +843,31 @@ footer {
     justify-content: center;
   }
 
-  #quiz-setup .quiz-links {
+  #quiz-setup .quiz-links.quiz-setup-links {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 12px;
+  }
+  .quiz-setup-links .quiz-links-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin-left: 0;
+    gap: 12px;
+  }
+  .quiz-setup-links .quiz-links-left .button {
+    width: 100%;
+  }
+  .quiz-setup-links .quiz-links-right {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .quiz-setup-links .quiz-links-right #quiz-propose {
+    flex: 1 1 auto;
+    width: auto;
   }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
