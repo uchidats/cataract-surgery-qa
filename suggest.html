@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#245880">
+  <title>新しい問題を提案｜白内障手術 Q&amp;A</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/x-icon" href="favicon.ico?v=28">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
+  <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
+  <link rel="stylesheet" href="styles.css?v=40">
+  <script src="suggest.js?v=40" defer></script>
+</head>
+<body>
+  <header class="site-header compact">
+    <div class="container">
+      <a class="site-title" href="index.html">白内障手術 Q&amp;A</a>
+      <p class="tagline">手術を始める前に習得したい基礎知識</p>
+    </div>
+  </header>
+
+  <main class="quiz-page">
+    <div class="container narrow">
+      <nav class="suggest-nav" aria-label="パンくずリスト">
+        <a href="index.html" class="suggest-back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>トップ画面に戻る</span>
+        </a>
+      </nav>
+
+      <section id="suggest-card" class="quiz-card suggest-card" aria-labelledby="suggest-heading">
+        <h1 id="suggest-heading" class="suggest-title">新しい問題を提案</h1>
+
+        <div class="suggest-intro">
+          <p class="suggest-lead">「初心者のときに、こんなことを知っておきたかった」――そんな問題を募集中です。</p>
+          <p class="suggest-sub">文章問題はもちろん、術中写真・模式図・表などを使った問題も大歓迎です。</p>
+          <p class="suggest-note">問題文、選択肢、正解、解説、参照ページなど、分かる範囲でご入力ください。</p>
+        </div>
+
+        <form id="suggest-form" class="suggest-form" novalidate>
+          <div id="suggest-form-error" class="suggest-form-error" role="alert" aria-live="polite" hidden></div>
+
+          <div class="form-group">
+            <label for="suggest-chapter" class="form-label">
+              単元
+              <span class="badge badge-required">必須</span>
+            </label>
+            <select id="suggest-chapter" name="chapter" class="form-control" required aria-describedby="suggest-chapter-help">
+              <option value="">-- 単元を選択してください --</option>
+              <option value="②③④ 術前準備・消毒・麻酔">②③④ 術前準備・消毒・麻酔</option>
+              <option value="⑤ 強角膜切開">⑤ 強角膜切開</option>
+              <option value="⑥ CCC">⑥ CCC</option>
+              <option value="⑦ ハイドロダイセクション">⑦ ハイドロダイセクション</option>
+              <option value="⑧ 核処理">⑧ 核処理</option>
+              <option value="⑨⑩ 皮質吸引・後嚢研磨">⑨⑩ 皮質吸引・後嚢研磨</option>
+              <option value="⑪ IOL挿入">⑪ IOL挿入</option>
+              <option value="⑫ 創口閉鎖と縫合">⑫ 創口閉鎖と縫合</option>
+              <option value="⑬ 眼内レンズの選択">⑬ 眼内レンズの選択</option>
+              <option value="その他">その他（新規単元・全般）</option>
+            </select>
+            <p id="suggest-chapter-help" class="form-help">出題対象となる単元・テーマを選択してください。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="suggest-question" class="form-label">
+              問題文案
+              <span class="badge badge-required">必須</span>
+            </label>
+            <textarea id="suggest-question" name="question" class="form-control" rows="4" placeholder="例：白内障手術のセッティングで気をつけることについて、誤っているものはどれか？1つ選べ。" required aria-describedby="suggest-question-help"></textarea>
+            <p id="suggest-question-help" class="form-help">出題したい問題文をご入力ください。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="suggest-choices" class="form-label">
+              選択肢案
+              <span class="badge badge-required">必須</span>
+            </label>
+            <textarea id="suggest-choices" name="choices" class="form-control" rows="5" placeholder="1. ○○○○&#10;2. ○○○○&#10;3. ○○○○&#10;4. ○○○○&#10;5. ○○○○" required aria-describedby="suggest-choices-help"></textarea>
+            <p id="suggest-choices-help" class="form-help">1行に1つずつ、または番号付きでご入力ください（4〜5択目安）。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="suggest-correct" class="form-label">
+              正解
+              <span class="badge badge-required">必須</span>
+            </label>
+            <input type="text" id="suggest-correct" name="correct" class="form-control" placeholder="例：4（または正解の選択肢の文章）" required aria-describedby="suggest-correct-help">
+            <p id="suggest-correct-help" class="form-help">正解の番号や選択肢の文章をご入力ください。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="suggest-explanation" class="form-label">
+              解説案
+              <span class="badge badge-optional">任意</span>
+            </label>
+            <textarea id="suggest-explanation" name="explanation" class="form-control" rows="4" placeholder="例：上方切開の場合、やや顎が下がった状態（chin down）のとき手術が最もやりづらい。なぜなら〜〜" aria-describedby="suggest-explanation-help"></textarea>
+            <p id="suggest-explanation-help" class="form-help">正解・不正解の理由や、臨床上のポイントなどがあればご入力ください。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="suggest-source" class="form-label">
+              参照ページ
+              <span class="badge badge-optional">任意</span>
+            </label>
+            <input type="text" id="suggest-source" name="source" class="form-control" placeholder="例：『スタンダード白内障手術』p.23" aria-describedby="suggest-source-help">
+            <p id="suggest-source-help" class="form-help">書籍の該当ページや参考文献があればご入力ください。</p>
+          </div>
+
+          <div class="form-group">
+            <label for="suggest-author" class="form-label">
+              提案者名（任意）
+              <span class="badge badge-optional">任意</span>
+            </label>
+            <input type="text" id="suggest-author" name="author" class="form-control" placeholder="例：匿名、ニックネーム、実名など" aria-describedby="suggest-author-help">
+            <p id="suggest-author-help" class="form-help">空欄のままでも送信可能です。</p>
+          </div>
+
+          <div class="suggest-actions">
+            <button type="submit" id="suggest-submit-btn" class="button">提案を送信する</button>
+            <a href="index.html" class="button secondary">トップへ戻る</a>
+          </div>
+        </form>
+
+        <div id="suggest-success-view" class="suggest-success-view" hidden>
+          <div class="suggest-success-icon" aria-hidden="true">✓</div>
+          <h2 class="suggest-success-title">問題案を受け付けました</h2>
+          <p class="suggest-success-desc">
+            ご提案ありがとうございます！<br>
+            入力いただいた問題案の送信が完了しました。
+          </p>
+
+          <div class="suggest-preview-card">
+            <h3 class="suggest-preview-heading">入力内容の確認</h3>
+            <dl class="suggest-preview-list">
+              <div class="suggest-preview-row">
+                <dt>単元</dt>
+                <dd id="preview-chapter"></dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>問題文案</dt>
+                <dd id="preview-question"></dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>選択肢案</dt>
+                <dd id="preview-choices"></dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>正解</dt>
+                <dd id="preview-correct"></dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>解説案</dt>
+                <dd id="preview-explanation"></dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>参照ページ</dt>
+                <dd id="preview-source"></dd>
+              </div>
+              <div class="suggest-preview-row">
+                <dt>提案者名</dt>
+                <dd id="preview-author"></dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="suggest-actions suggest-success-actions">
+            <a href="index.html" class="button">クイズのトップに戻る</a>
+            <button type="button" id="suggest-again-btn" class="button secondary">続けて別の問題を提案する</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>© 白内障手術 Q&amp;A. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>
