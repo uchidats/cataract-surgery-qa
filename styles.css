@@ -1430,7 +1430,13 @@ textarea.form-control {
   line-height: 1.4;
 }
 .quiz-qr-dialog-actions {
-  justify-content: center;
+  display: flex !important;
+  justify-content: center !important;
+  grid-template-columns: none !important;
+}
+.quiz-qr-dialog-actions .button {
+  width: auto !important;
+  min-width: 120px;
 }
 
 @media (max-width: 600px) {

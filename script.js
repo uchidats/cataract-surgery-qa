@@ -987,17 +987,32 @@
       localStorage.setItem(SHARE_HINT_KEY, "true");
     } catch {}
 
+    // まずQRコード側の補助ラベルを約3秒表示
     shareQrHint.hidden = false;
-    shareCopyHint.hidden = false;
+    shareCopyHint.hidden = true;
     requestAnimationFrame(() => {
       shareQrHint.classList.add("is-visible");
-      shareCopyHint.classList.add("is-visible");
     });
 
-    if (shareHintsTimer) clearTimeout(shareHintsTimer);
+    // 3秒後にQRコード側を非表示にし、少し間を置いてリンクコピー側を表示
     shareHintsTimer = setTimeout(() => {
-      hideShareHints();
-    }, 3800);
+      shareQrHint.classList.remove("is-visible");
+      setTimeout(() => {
+        shareQrHint.hidden = true;
+        // リンクコピー側の補助ラベルを約3秒表示
+        shareCopyHint.hidden = false;
+        requestAnimationFrame(() => {
+          shareCopyHint.classList.add("is-visible");
+        });
+        shareHintsTimer = setTimeout(() => {
+          shareCopyHint.classList.remove("is-visible");
+          setTimeout(() => {
+            shareCopyHint.hidden = true;
+            shareHintsTimer = null;
+          }, 300);
+        }, 3000);
+      }, 300);
+    }, 3000);
   }
 
   function hideShareHints() {
