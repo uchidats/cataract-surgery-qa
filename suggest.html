@@ -10,8 +10,9 @@
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
-  <link rel="stylesheet" href="styles.css?v=43">
-  <script src="suggest.js?v=43" defer></script>
+  <link rel="stylesheet" href="styles.css?v=44">
+  <script src="questions.js?v=41" defer></script>
+  <script src="suggest.js?v=44" defer></script>
 </head>
 <body>
   <header class="site-header compact">
@@ -40,6 +41,49 @@
           <p class="suggest-sub">文章問題はもちろん、術中写真・模式図・表などを使った問題も大歓迎です。</p>
           <p class="suggest-note">問題文、選択肢、正解、解説、参照ページなどをご入力ください（下書きは自動で保存されます）。画像は一番下からアップロードできます。</p>
         </div>
+
+        <!-- 既存問題を確認セクション -->
+        <details id="existing-questions-section" class="existing-questions-section">
+          <summary class="existing-questions-summary">
+            <span class="existing-questions-summary-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+              </svg>
+              <span>既存問題を確認</span>
+            </span>
+            <span class="existing-questions-total-badge" id="existing-questions-total-badge">読込中…</span>
+          </summary>
+          <div class="existing-questions-body">
+            <p class="existing-questions-desc">
+              既存問題との重複回避や、問題が少ない単元の把握、出題粒度の参考にご活用ください。<br>
+              ※問題文と選択肢のみを表示しています。
+            </p>
+            <div class="existing-questions-toolbar">
+              <div class="existing-filter-row">
+                <label for="existing-chapter-filter" class="existing-filter-label">表示単元：</label>
+                <select id="existing-chapter-filter" class="form-control existing-filter-select">
+                  <option value="all">すべての単元を表示</option>
+                </select>
+              </div>
+              <div class="existing-toolbar-actions">
+                <label class="existing-filter-checkbox-label">
+                  <input type="checkbox" id="existing-filter-sync" checked>
+                  <span>選択中の単元と連動</span>
+                </label>
+                <div class="existing-accordion-controls">
+                  <button type="button" id="existing-expand-all-btn" class="existing-text-btn">すべて開く</button>
+                  <span class="existing-divider" aria-hidden="true">/</span>
+                  <button type="button" id="existing-collapse-all-btn" class="existing-text-btn">すべて閉じる</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="existing-questions-list" class="existing-questions-list" aria-live="polite">
+              <!-- JSで単元別アコーディオンを動的生成 -->
+            </div>
+          </div>
+        </details>
 
         <form id="suggest-form" class="suggest-form" novalidate>
           <div id="suggest-form-error" class="suggest-form-error" role="alert" aria-live="polite" hidden></div>

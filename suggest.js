@@ -584,6 +584,256 @@
     });
   }
 
+  // ==========================================================================
+  // 既存問題参照機能 (Existing Questions Reference)
+  // ==========================================================================
+  const existingSection = document.getElementById("existing-questions-section");
+  const existingTotalBadge = document.getElementById("existing-questions-total-badge");
+  const existingFilterSelect = document.getElementById("existing-chapter-filter");
+  const existingFilterSync = document.getElementById("existing-filter-sync");
+  const existingQuestionsList = document.getElementById("existing-questions-list");
+  const existingExpandAllBtn = document.getElementById("existing-expand-all-btn");
+  const existingCollapseAllBtn = document.getElementById("existing-collapse-all-btn");
+
+  function initExistingQuestions() {
+    if (!existingSection || !existingQuestionsList) return;
+
+    const questions = Array.isArray(window.QUESTIONS) ? window.QUESTIONS : [];
+    const definedChapters = Array.isArray(window.CHAPTERS) ? window.CHAPTERS : [];
+
+    // 単元リストの構築（definedChaptersを基準にしつつ、QUESTIONSに存在する単元も網羅）
+    const allChapters = [...definedChapters];
+    questions.forEach(q => {
+      if (q && q.chapter && !allChapters.includes(q.chapter)) {
+        allChapters.push(q.chapter);
+      }
+    });
+
+    // 単元ごとの問題グループ化
+    const chapterQuestionsMap = new Map();
+    allChapters.forEach(ch => chapterQuestionsMap.set(ch, []));
+    questions.forEach(q => {
+      if (q && q.chapter) {
+        if (!chapterQuestionsMap.has(q.chapter)) {
+          chapterQuestionsMap.set(q.chapter, []);
+        }
+        chapterQuestionsMap.get(q.chapter).push(q);
+      }
+    });
+
+    // 総問題数バッジの更新
+    if (existingTotalBadge) {
+      existingTotalBadge.textContent = `全${questions.length}問`;
+    }
+
+    // フィルタセレクトボックスの選択肢構築
+    if (existingFilterSelect) {
+      existingFilterSelect.innerHTML = `<option value="all">すべての単元を表示 (全${questions.length}問)</option>`;
+      allChapters.forEach(ch => {
+        const count = (chapterQuestionsMap.get(ch) || []).length;
+        const opt = document.createElement("option");
+        opt.value = ch;
+        opt.textContent = `${ch} (${count}問)`;
+        existingFilterSelect.appendChild(opt);
+      });
+    }
+
+    // 単元ごとのアコーディオンDOM構築
+    existingQuestionsList.innerHTML = "";
+    allChapters.forEach(ch => {
+      const chQuestions = chapterQuestionsMap.get(ch) || [];
+      const count = chQuestions.length;
+
+      const details = document.createElement("details");
+      details.className = "existing-chapter-card";
+      details.dataset.chapter = ch;
+
+      const summary = document.createElement("summary");
+      summary.className = "existing-chapter-summary";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "existing-chapter-name";
+      nameSpan.textContent = ch;
+
+      const activeBadge = document.createElement("span");
+      activeBadge.className = "existing-chapter-active-badge";
+      activeBadge.textContent = "選択中";
+      activeBadge.hidden = true;
+
+      const countSpan = document.createElement("span");
+      countSpan.className = `existing-chapter-count${count === 0 ? " zero" : ""}`;
+      countSpan.textContent = `${count}問`;
+
+      summary.appendChild(nameSpan);
+      summary.appendChild(activeBadge);
+      summary.appendChild(countSpan);
+      details.appendChild(summary);
+
+      const body = document.createElement("div");
+      body.className = "existing-chapter-body";
+
+      if (count === 0) {
+        const emptyP = document.createElement("p");
+        emptyP.className = "existing-empty-text";
+        emptyP.textContent = "現在この単元の問題はありません（問題募集中です！）。";
+        body.appendChild(emptyP);
+      } else {
+        chQuestions.forEach((q, idx) => {
+          const item = document.createElement("div");
+          item.className = "existing-question-item";
+
+          const header = document.createElement("div");
+          header.className = "existing-question-header";
+
+          const num = document.createElement("span");
+          num.className = "existing-question-num";
+          num.textContent = `問${idx + 1}`;
+
+          const qText = document.createElement("p");
+          qText.className = "existing-question-text";
+          qText.textContent = q.question || "";
+
+          header.appendChild(num);
+          header.appendChild(qText);
+          item.appendChild(header);
+
+          if (Array.isArray(q.choices) && q.choices.length > 0) {
+            const ol = document.createElement("ol");
+            ol.className = "existing-question-choices";
+            q.choices.forEach(c => {
+              const li = document.createElement("li");
+              li.textContent = c;
+              ol.appendChild(li);
+            });
+            item.appendChild(ol);
+          }
+
+          body.appendChild(item);
+        });
+      }
+
+      details.appendChild(body);
+      existingQuestionsList.appendChild(details);
+    });
+
+    // フィルタ更新関数
+    function applyFilter(selectedChapter, source) {
+      const isSyncEnabled = existingFilterSync ? existingFilterSync.checked : true;
+      let filterValue = existingFilterSelect ? existingFilterSelect.value : "all";
+
+      // フォームの単元変更または連動切り替えから呼ばれた場合
+      if (source === "sync" || source === "chapterChange") {
+        if (isSyncEnabled) {
+          if (selectedChapter && chapterQuestionsMap.has(selectedChapter)) {
+            filterValue = selectedChapter;
+            if (existingFilterSelect) existingFilterSelect.value = selectedChapter;
+          } else {
+            filterValue = "all";
+            if (existingFilterSelect) existingFilterSelect.value = "all";
+          }
+        } else if (source === "sync") {
+          // 連動がOFFにされた場合は全表示に戻す
+          filterValue = "all";
+          if (existingFilterSelect) existingFilterSelect.value = "all";
+        }
+      }
+
+      // 各カードの表示・非表示と強調表示の適用
+      const cards = existingQuestionsList.querySelectorAll(".existing-chapter-card");
+      cards.forEach(card => {
+        const ch = card.dataset.chapter;
+        const matchesFilter = filterValue === "all" || ch === filterValue;
+        const isCurrentSelected = ch === selectedChapter;
+
+        if (matchesFilter) {
+          card.classList.remove("is-hidden");
+        } else {
+          card.classList.add("is-hidden");
+        }
+
+        const badge = card.querySelector(".existing-chapter-active-badge");
+        if (isCurrentSelected) {
+          card.classList.add("is-selected-chapter");
+          if (badge) badge.hidden = false;
+          if (matchesFilter) {
+            card.open = true; // 選択中の単元は開いておく
+          }
+        } else {
+          card.classList.remove("is-selected-chapter");
+          if (badge) badge.hidden = true;
+        }
+      });
+    }
+
+    // イベントリスナー登録
+    if (existingFilterSelect) {
+      existingFilterSelect.addEventListener("change", () => {
+        const val = existingFilterSelect.value;
+        const cards = existingQuestionsList.querySelectorAll(".existing-chapter-card");
+        cards.forEach(card => {
+          const ch = card.dataset.chapter;
+          const matches = val === "all" || ch === val;
+          if (matches) {
+            card.classList.remove("is-hidden");
+            if (val !== "all") card.open = true;
+          } else {
+            card.classList.add("is-hidden");
+          }
+        });
+      });
+    }
+
+    if (existingFilterSync) {
+      existingFilterSync.addEventListener("change", () => {
+        applyFilter(fields.chapter ? fields.chapter.value : "", "sync");
+      });
+    }
+
+    if (existingExpandAllBtn) {
+      existingExpandAllBtn.addEventListener("click", () => {
+        existingQuestionsList.querySelectorAll(".existing-chapter-card:not(.is-hidden)").forEach(c => {
+          c.open = true;
+        });
+      });
+    }
+
+    if (existingCollapseAllBtn) {
+      existingCollapseAllBtn.addEventListener("click", () => {
+        existingQuestionsList.querySelectorAll(".existing-chapter-card").forEach(c => {
+          c.open = false;
+        });
+      });
+    }
+
+    // フォームの単元変更時の連動
+    if (fields.chapter) {
+      const handleChapterSync = () => {
+        applyFilter(fields.chapter.value, "chapterChange");
+      };
+      fields.chapter.addEventListener("change", handleChapterSync);
+    }
+
+    // 親セクションが開かれたとき、必要に応じて選択中単元の強調・展開を確認
+    existingSection.addEventListener("toggle", () => {
+      if (existingSection.open && fields.chapter && fields.chapter.value) {
+        applyFilter(fields.chapter.value, "sync");
+        const activeCard = existingQuestionsList.querySelector(".existing-chapter-card.is-selected-chapter:not(.is-hidden)");
+        if (activeCard) {
+          activeCard.open = true;
+          setTimeout(() => {
+            activeCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }, 100);
+        }
+      }
+    });
+
+    // 初期状態適用（下書き復元後など）
+    applyFilter(fields.chapter ? fields.chapter.value : "", "sync");
+  }
+
   // 初期化時に保存済み下書きを復元
   restoreDraft();
+
+  // 既存問題参照機能の初期化
+  initExistingQuestions();
 })();
