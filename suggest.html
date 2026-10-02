@@ -10,9 +10,9 @@
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
-  <link rel="stylesheet" href="styles.css?v=44">
-  <script src="questions.js?v=41" defer></script>
-  <script src="suggest.js?v=44" defer></script>
+  <link rel="stylesheet" href="styles.css?v=46">
+  <script src="questions.js?v=42" defer></script>
+  <script src="suggest.js?v=46" defer></script>
 </head>
 <body>
   <header class="site-header compact">
@@ -65,17 +65,6 @@
                 <select id="existing-chapter-filter" class="form-control existing-filter-select">
                   <option value="all">すべての単元を表示</option>
                 </select>
-              </div>
-              <div class="existing-toolbar-actions">
-                <label class="existing-filter-checkbox-label">
-                  <input type="checkbox" id="existing-filter-sync" checked>
-                  <span>選択中の単元と連動</span>
-                </label>
-                <div class="existing-accordion-controls">
-                  <button type="button" id="existing-expand-all-btn" class="existing-text-btn">すべて開く</button>
-                  <span class="existing-divider" aria-hidden="true">/</span>
-                  <button type="button" id="existing-collapse-all-btn" class="existing-text-btn">すべて閉じる</button>
-                </div>
               </div>
             </div>
 
@@ -262,5 +251,16 @@
       <p>© 白内障手術 Q&amp;A. All rights reserved.</p>
     </div>
   </footer>
+
+  <!-- 既存問題 画像拡大プレビューモーダル -->
+  <dialog id="existing-image-dialog" class="existing-image-dialog" aria-labelledby="existing-image-dialog-title">
+    <div class="existing-image-dialog-content">
+      <div class="existing-image-dialog-header">
+        <h2 id="existing-image-dialog-title" class="existing-image-dialog-title">選択肢画像の確認</h2>
+        <button type="button" id="existing-image-dialog-close" class="button secondary existing-image-dialog-close">閉じる</button>
+      </div>
+      <img id="existing-image-dialog-img" src="" alt="選択肢拡大画像" class="existing-image-dialog-img">
+    </div>
+  </dialog>
 </body>
 </html>

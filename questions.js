@@ -1033,3 +1033,8 @@ const CHAPTERS = [
   "⑫ 創口閉鎖と縫合",
   "⑬ 眼内レンズの選択"
 ];
+
+if (typeof window !== "undefined") {
+  window.QUESTIONS = QUESTIONS;
+  window.CHAPTERS = CHAPTERS;
+}
