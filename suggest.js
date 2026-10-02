@@ -15,6 +15,9 @@
   const againBtn = document.getElementById("suggest-again-btn");
   const suggestCard = document.getElementById("suggest-card");
   const clearDraftBtn = document.getElementById("suggest-clear-draft-btn");
+  const draftDialog = document.getElementById("suggest-draft-dialog");
+  const draftDialogCancelBtn = document.getElementById("suggest-draft-dialog-cancel");
+  const draftDialogConfirmBtn = document.getElementById("suggest-draft-dialog-confirm");
 
   // 添付ファイル関連の要素
   const fileInput = document.getElementById("suggest-files");
@@ -551,21 +554,70 @@
     }
   });
 
+  // 下書き削除モーダル制御関数
+  function openDraftDialog() {
+    if (!draftDialog) return;
+    if (typeof draftDialog.showModal === "function") {
+      draftDialog.showModal();
+    } else {
+      draftDialog.setAttribute("open", "");
+    }
+    if (draftDialogCancelBtn && typeof draftDialogCancelBtn.focus === "function") {
+      draftDialogCancelBtn.focus();
+    }
+  }
+
+  function closeDraftDialog() {
+    if (!draftDialog) return;
+    if (typeof draftDialog.close === "function") {
+      draftDialog.close();
+    } else {
+      draftDialog.removeAttribute("open");
+    }
+    if (clearDraftBtn && typeof clearDraftBtn.focus === "function") {
+      clearDraftBtn.focus();
+    }
+  }
+
+  function executeClearDraft() {
+    closeDraftDialog();
+    clearDraft();
+    selectedFiles = [];
+    renderFileList();
+    clearFileError();
+    if (fileDraftNotice) fileDraftNotice.hidden = true;
+    form.reset();
+    clearErrors();
+  }
+
   // 「下書きを削除」ボタンのイベント
   if (clearDraftBtn) {
     clearDraftBtn.addEventListener("click", () => {
-      const confirmed = window.confirm(
-        "保存されている下書きを削除しますか？\n入力中の内容はすべて消去されます。"
-      );
-      if (!confirmed) return;
+      if (draftDialog) {
+        openDraftDialog();
+      } else {
+        executeClearDraft();
+      }
+    });
+  }
 
-      clearDraft();
-      selectedFiles = [];
-      renderFileList();
-      clearFileError();
-      if (fileDraftNotice) fileDraftNotice.hidden = true;
-      form.reset();
-      clearErrors();
+  if (draftDialogCancelBtn) {
+    draftDialogCancelBtn.addEventListener("click", closeDraftDialog);
+  }
+
+  if (draftDialogConfirmBtn) {
+    draftDialogConfirmBtn.addEventListener("click", executeClearDraft);
+  }
+
+  if (draftDialog) {
+    draftDialog.addEventListener("click", (e) => {
+      if (e.target === draftDialog) {
+        closeDraftDialog();
+      }
+    });
+    draftDialog.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      closeDraftDialog();
     });
   }
 

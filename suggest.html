@@ -10,9 +10,9 @@
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon.png?v=28">
   <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192.png?v=28">
   <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png?v=28">
-  <link rel="stylesheet" href="styles.css?v=48">
+  <link rel="stylesheet" href="styles.css?v=49">
   <script src="questions.js?v=42" defer></script>
-  <script src="suggest.js?v=48" defer></script>
+  <script src="suggest.js?v=49" defer></script>
 </head>
 <body>
   <header class="site-header compact">
@@ -39,7 +39,7 @@
         <div class="suggest-intro">
           <p class="suggest-lead">「初心者のときに、こんなことを知っておきたかった」――そんな問題を募集中です。</p>
           <p class="suggest-sub">文章問題はもちろん、術中写真・模式図・表などを使った問題も大歓迎です。</p>
-          <p class="suggest-note">問題文、選択肢、正解、解説、参照ページなどをご入力ください（下書きは自動で保存されます）。画像は一番下からアップロードできます。</p>
+          <p class="suggest-note">問題文、選択肢、正解、解説、参照ページなどを入力してください（下書きは自動で保存されます）。画像は一番下からアップロードできます。</p>
         </div>
 
         <!-- 既存問題を確認セクション -->
@@ -251,6 +251,21 @@
       <p>© 白内障手術 Q&amp;A. All rights reserved.</p>
     </div>
   </footer>
+
+  <!-- 下書き削除 確認モーダル -->
+  <dialog id="suggest-draft-dialog" class="quiz-modal" aria-labelledby="suggest-draft-dialog-title" aria-describedby="suggest-draft-dialog-desc">
+    <div class="quiz-modal-inner">
+      <h2 id="suggest-draft-dialog-title" class="quiz-modal-title">下書きを削除</h2>
+      <p id="suggest-draft-dialog-desc" class="quiz-modal-desc">
+        保存されている下書きを削除しますか？<br>
+        入力中の内容はすべて消去されます。
+      </p>
+      <div class="quiz-modal-actions">
+        <button id="suggest-draft-dialog-cancel" class="button secondary" type="button">キャンセル</button>
+        <button id="suggest-draft-dialog-confirm" class="button button-danger" type="button">下書きを削除</button>
+      </div>
+    </div>
+  </dialog>
 
   <!-- 既存問題 画像拡大プレビューモーダル -->
   <dialog id="existing-image-dialog" class="existing-image-dialog" aria-labelledby="existing-image-dialog-title">

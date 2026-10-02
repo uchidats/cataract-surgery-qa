@@ -976,6 +976,22 @@ dialog:not([open]) {
   background: #e5ebf1;
 }
 
+/* 削除操作など警告アクション用ボタン */
+.quiz-modal-actions .button.button-danger {
+  background: #c92a2a;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.quiz-modal-actions .button.button-danger:hover {
+  background: #b02525;
+}
+
+.quiz-modal-actions .button.button-danger:focus-visible {
+  outline: 2px solid #c92a2a;
+  outline-offset: 2px;
+}
+
 @media (max-width: 480px) {
   .quiz-modal-inner {
     padding: 20px 16px;
