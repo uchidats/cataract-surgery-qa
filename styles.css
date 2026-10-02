@@ -1307,6 +1307,60 @@ dialog:not([open]) {
   flex: 1;
 }
 
+/* 既存問題の表（table）表示 */
+.existing-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 10px 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.existing-table {
+  width: 100%;
+  min-width: 540px;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  text-align: left;
+}
+.existing-table th,
+.existing-table td {
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  vertical-align: middle;
+}
+.existing-table th {
+  background: var(--soft-blue);
+  color: var(--heading);
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+}
+.existing-table tbody tr:nth-child(even) {
+  background: rgba(244, 246, 248, 0.45);
+}
+.existing-table td.existing-table-blank-cell {
+  text-align: center;
+}
+.existing-table-blank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.05em;
+  color: var(--heading);
+  background: var(--soft-blue);
+  border: 1.5px solid var(--accent);
+  border-radius: 4px;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
 .existing-question-choices {
   margin: 0;
   padding-left: 20px;
@@ -1793,6 +1847,16 @@ textarea.form-control {
   }
   .existing-question-item {
     padding: 10px 12px;
+  }
+  .existing-table-container {
+    margin: 8px 0 12px;
+  }
+  .existing-table {
+    font-size: 0.84rem;
+  }
+  .existing-table th,
+  .existing-table td {
+    padding: 7px 8px;
   }
 }
 

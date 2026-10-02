@@ -633,6 +633,59 @@
     existingImageDialog.addEventListener("cancel", closeExistingImagePreview);
   }
 
+  // 既存問題用の表要素を構築
+  function createExistingTableElement(tableData) {
+    if (!tableData || typeof tableData !== "object") return null;
+
+    const container = document.createElement("div");
+    container.className = "existing-table-container";
+
+    const table = document.createElement("table");
+    table.className = "existing-table";
+
+    // 表ヘッダー
+    if (Array.isArray(tableData.headers) && tableData.headers.length > 0) {
+      const thead = document.createElement("thead");
+      const tr = document.createElement("tr");
+      tableData.headers.forEach(headerText => {
+        const th = document.createElement("th");
+        th.textContent = headerText;
+        tr.appendChild(th);
+      });
+      thead.appendChild(tr);
+      table.appendChild(thead);
+    }
+
+    // 表本文
+    if (Array.isArray(tableData.rows) && tableData.rows.length > 0) {
+      const tbody = document.createElement("tbody");
+      tableData.rows.forEach(row => {
+        if (!Array.isArray(row)) return;
+        const tr = document.createElement("tr");
+        row.forEach(cell => {
+          const td = document.createElement("td");
+          const str = String(cell ?? "").trim();
+          // 空欄番号（1〜9など）の場合は見やすくバッジ装飾
+          if (/^[1-9]$/.test(str)) {
+            td.className = "existing-table-blank-cell";
+            const span = document.createElement("span");
+            span.className = "existing-table-blank";
+            span.textContent = str;
+            td.appendChild(span);
+          } else {
+            td.textContent = cell !== undefined && cell !== null ? String(cell) : "";
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+    }
+
+    container.appendChild(table);
+    return container;
+  }
+
   function initExistingQuestions() {
     if (!existingSection || !existingQuestionsList) return;
 
@@ -759,6 +812,14 @@
           header.appendChild(num);
           header.appendChild(qText);
           item.appendChild(header);
+
+          // 表（table）がある場合、問題文の直後・選択肢の前に追加
+          if (q.table) {
+            const tableEl = createExistingTableElement(q.table);
+            if (tableEl) {
+              item.appendChild(tableEl);
+            }
+          }
 
           if (Array.isArray(q.choices) && q.choices.length > 0) {
             const ol = document.createElement("ol");
