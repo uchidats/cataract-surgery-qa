@@ -638,7 +638,7 @@
     if (!tableData || typeof tableData !== "object") return null;
 
     const container = document.createElement("div");
-    container.className = "existing-table-container";
+    container.className = "existing-question-table-wrap existing-table-container";
 
     const table = document.createElement("table");
     table.className = "existing-table";

@@ -1056,6 +1056,9 @@ dialog:not([open]) {
 
 /* 既存問題を確認セクション (suggest.html) */
 .existing-questions-section {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   border: 1px solid #d4e4f2;
   border-radius: 8px;
   background: #fcfdfe;
@@ -1133,6 +1136,9 @@ dialog:not([open]) {
 .existing-questions-body {
   padding: 16px;
   border-top: 1px solid #d4e4f2;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .existing-questions-desc {
   margin: 0 0 14px;
@@ -1174,9 +1180,16 @@ dialog:not([open]) {
 /* 単元別アコーディオンリスト */
 .existing-questions-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .existing-chapter-card {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #ffffff;
@@ -1205,6 +1218,9 @@ dialog:not([open]) {
   color: var(--heading);
   list-style: none;
   transition: background-color 0.15s;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .existing-chapter-summary::-webkit-details-marker {
   display: none;
@@ -1233,8 +1249,10 @@ dialog:not([open]) {
 }
 
 .existing-chapter-name {
-  flex: 1;
+  flex: 1 1 0%;
   min-width: 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .existing-chapter-count {
   font-size: 0.78rem;
@@ -1266,7 +1284,11 @@ dialog:not([open]) {
   border-top: 1px solid #edf2f7;
   background: #fafbfc;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .existing-empty-text {
   margin: 4px 0;
@@ -1282,12 +1304,19 @@ dialog:not([open]) {
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   padding: 12px 14px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 .existing-question-header {
   display: flex;
   align-items: baseline;
   gap: 8px;
   margin-bottom: 8px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .existing-question-num {
   font-size: 0.78rem;
@@ -1304,12 +1333,21 @@ dialog:not([open]) {
   font-weight: 600;
   color: var(--heading);
   line-height: 1.55;
-  flex: 1;
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* 既存問題の表（table）表示 */
+.existing-question-table-wrap,
 .existing-table-container {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin: 10px 0 14px;
@@ -1368,17 +1406,37 @@ dialog:not([open]) {
   color: var(--text);
   line-height: 1.5;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .existing-question-choices li {
   padding-left: 2px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .existing-choice-content {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
+  min-width: 0;
   max-width: 100%;
+  box-sizing: border-box;
+}
+.existing-choice-text {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .existing-choice-image-btn {
   display: inline-block;
@@ -1847,9 +1905,17 @@ textarea.form-control {
   }
   .existing-question-item {
     padding: 10px 12px;
+    min-width: 0;
+    max-width: 100%;
   }
+  .existing-question-choices {
+    padding-left: 18px;
+  }
+  .existing-question-table-wrap,
   .existing-table-container {
     margin: 8px 0 12px;
+    max-width: 100%;
+    min-width: 0;
   }
   .existing-table {
     font-size: 0.84rem;
