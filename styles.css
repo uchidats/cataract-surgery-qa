@@ -2185,3 +2185,16 @@ textarea.form-control {
   }
 }
 
+
+/* Keep the active question near the top; home screen content stays unchanged. */
+body:has(#quiz-panel:not([hidden])) .site-header,
+body:has(#quiz-panel:not([hidden])) .quiz-intro,
+body:has(#quiz-panel:not([hidden])) #mastery-progress,
+body:has(#quiz-panel:not([hidden])) #mastery-progress-track {
+  display: none;
+}
+
+body:has(#quiz-panel:not([hidden])) .quiz-page {
+  margin-top: 8px;
+  padding-top: 8px;
+}
